@@ -4,7 +4,7 @@ import DashboardLayout from "../layout/DashboardLayout"
 
 
 type ChildrenProps = {
-    children: ReactNode
+    children?: ReactNode
 
 
 }
