@@ -4,6 +4,7 @@ import { FileText, Menu, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import ProfileDropdown from "../layout/ProfileDropdown";
 import Button from "../ui/Button";
+import { useAuthStore } from "../../store/authStore";
 
 
 interface User {
@@ -18,7 +19,7 @@ const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
     const [profileDropdownOpen, setProfileDropdownOpen] = useState<boolean>(false);
 
-    const isAuthenticated = true;
+    const { isAuthenticated } = useAuthStore()
     const user: User = { name: "Azula", email: "princessAzula@gmail.com", avatar: '' };
     const logout = () => { };
 
