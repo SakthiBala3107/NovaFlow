@@ -55,26 +55,26 @@ const Header = () => {
 
                     {/* Desktop Nav */}
                     <div className="hidden lg:flex lg:items-center lg:space-x-8">
-                        <Link
-                            to="#features"
+                        <a
+                            href="#features"
                             className="text-gray-600 hover:text-gray-900 font-medium transition-colors duration-200 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-black after:transition-all hover:after:w-full"
                         >
                             Features
-                        </Link>
+                        </a>
 
-                        <Link
-                            to="#testimonals"
+                        <a
+                            href="#testimonals"
                             className="text-gray-600 hover:text-gray-900 font-medium transition-colors duration-200 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-black after:transition-all hover:after:w-full"
                         >
                             Testimonals
-                        </Link>
+                        </a>
 
-                        <Link
-                            to="#faq"
+                        <a
+                            href="#faq"
                             className="text-gray-600 hover:text-gray-900 font-medium transition-colors duration-200 relative after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-black after:transition-all hover:after:w-full"
                         >
                             FAQ
-                        </Link>
+                        </a>
                     </div>
 
                     {/* Desktop Auth Buttons */}
