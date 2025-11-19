@@ -38,3 +38,34 @@ export const FEATURES: Feature[] = [
       "Create, edit, and organize all your invoices in one place, with AI helping you stay efficient and accurate.",
   },
 ];
+
+export type Testimonial = {
+  quote: string;
+  author: string;
+  title: string;
+  avatar: string;
+};
+
+export const TESTIMONIALS: Testimonial[] = [
+  {
+    quote:
+      "This app saved me hours of work. I can now create and send invoices in minutes!",
+    author: "Zuko",
+    title: "Freelance Designer",
+    avatar: "https://placehold.co/100x100/000000/ffffff?text=ZK",
+  },
+  {
+    quote:
+      "NovaFlow has completely streamlined our invoicing process. No more late payments!",
+    author: "Katara",
+    title: "Small Business Owner",
+    avatar: "https://placehold.co/100x100/000000/ffffff?text=KT",
+  },
+  {
+    quote:
+      "The AI reminders are a game-changer. I don’t have to chase clients anymore.",
+    author: "Toph",
+    title: "Project Manager",
+    avatar: "https://placehold.co/100x100/000000/ffffff?text=TP",
+  },
+];

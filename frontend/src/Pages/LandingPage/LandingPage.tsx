@@ -2,6 +2,7 @@
 import Features from '../../components/Landing/Features'
 import Header from '../../components/Landing/Header'
 import Hero from '../../components/Landing/Hero'
+import Testimonals from '../../components/Landing/Testimonals'
 
 const LandingPage = () => {
 
@@ -13,6 +14,7 @@ const LandingPage = () => {
             <main className='mb-[100vh]'>
                 <Hero />
                 <Features />
+                <Testimonals />
             </main>
         </div>
     )
