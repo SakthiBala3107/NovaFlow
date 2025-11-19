@@ -1,16 +1,5 @@
-import {
-  Sparkles,
-  BarChart2,
-  Mail,
-  FileText,
-  type LucideIcon,
-} from "lucide-react";
-
-export type Feature = {
-  icon?: LucideIcon;
-  title: string;
-  description: string;
-};
+import { Sparkles, BarChart2, Mail, FileText } from "lucide-react";
+import type { FAQ, Feature, Testimonial } from "../types/date.types";
 
 export const FEATURES: Feature[] = [
   {
@@ -39,13 +28,6 @@ export const FEATURES: Feature[] = [
   },
 ];
 
-export type Testimonial = {
-  quote: string;
-  author: string;
-  title: string;
-  avatar: string;
-};
-
 export const TESTIMONIALS: Testimonial[] = [
   {
     quote:
@@ -67,5 +49,38 @@ export const TESTIMONIALS: Testimonial[] = [
     author: "Toph",
     title: "Project Manager",
     avatar: "https://placehold.co/100x100/000000/ffffff?text=TP",
+  },
+];
+
+export const FAQS: FAQ[] = [
+  {
+    question: "How does Novaflow work?",
+    answer:
+      "Simply paste any text that contains invoice details — such as an email, a list of items, or unstructured data — and Novaflow automatically extracts, organizes, and formats the invoice information.",
+  },
+  {
+    question: "Is my invoice data secure?",
+    answer:
+      "Yes. All data is processed securely on encrypted channels. Novaflow does not store or share your invoice content without your permission.",
+  },
+  {
+    question: "Can I edit extracted invoice details?",
+    answer:
+      "Absolutely. After extraction, you can review and edit every field such as date, items, pricing, and client information before saving or exporting.",
+  },
+  {
+    question: "Does Novaflow support multiple invoice formats?",
+    answer:
+      "Yes. Novaflow can understand structured, semi-structured, and unstructured invoice text from emails, PDFs, chats, or notes.",
+  },
+  {
+    question: "Can I export invoices as PDF?",
+    answer:
+      "Yes. You can generate a clean, professional PDF invoice with a single click after reviewing and confirming the extracted details.",
+  },
+  {
+    question: "Do I need an account to use Novaflow?",
+    answer:
+      "No. You can extract and preview invoice details without an account. However, creating an account enables saving history, syncing, and advanced features.",
   },
 ];
