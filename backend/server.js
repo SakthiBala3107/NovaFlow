@@ -1,10 +1,11 @@
 import express from "express";
 import { ENV } from "./config/env.js";
-import path from "path";
+// import path from "path";
 import cors from "cors";
 import { connectDB } from "./config/db.js";
 import AuthMiddleWare from "./middlewares/authMiddlewares.js";
 import authRouter from "./routes/authRoutes.js";
+import invoiceRouter from "./routes/invoiceRoutes.js";
 
 const app = express();
 
@@ -20,7 +21,10 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-app.use('/api/auth', AuthMiddleWare, authRouter)
+
+// ROUTES
+app.use("/api/auth", AuthMiddleWare, authRouter);
+app.use("/api/auth", AuthMiddleWare, invoiceRouter);
 
 app.get("/", (req, res) => {
   res.send("Server running...");
