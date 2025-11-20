@@ -8,4 +8,6 @@ export const ENV = {
   DB_PASS: process.env.DB_PASS,
   JWT_SECRET: process.env.JWT_SECRET,
   JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN,
+  GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+  OPENAI_API_KEY: process.env.OPENAI_API_KEY,
 };
