@@ -17,3 +17,20 @@ export type FAQ = {
   question: string;
   answer: string;
 };
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+}
+
+export interface AuthContextType {
+  user: User | null;
+  isLoading: boolean;
+  isAuthenticated: boolean;
+  checkAuthStatus: () => Promise<void>;
+  login: (userData: User, token: string) => Promise<void>;
+  logout: () => Promise<void>;
+  updateUser: (updateUserData: Partial<User>) => Promise<void>;
+}
