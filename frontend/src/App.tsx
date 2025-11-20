@@ -9,8 +9,7 @@ import CreateInvoice from "./Pages/Invoices/CreateInvoice"
 import InvoiceDetail from "./Pages/Invoices/InvoiceDetail"
 import ProfilePage from "./Pages/Profile/ProfilePage"
 import ProtectedRoute from "./components/Auth/Procted.Route"
-
-
+// import {AuthProvider} from './context/AuthContext.jsx'
 
 const App = () => {
   return (
