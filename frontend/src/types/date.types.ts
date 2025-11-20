@@ -34,3 +34,7 @@ export interface AuthContextType {
   logout: () => Promise<void>;
   updateUser: (updateUserData: Partial<User>) => Promise<void>;
 }
+
+export interface ApiError {
+  message: string;
+}

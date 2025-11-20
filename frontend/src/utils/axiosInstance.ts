@@ -14,10 +14,14 @@ const axiosInstance = axios.create({
 // REQUEST INTERCEPTOR
 axiosInstance.interceptors.request.use(
   (config: InternalAxiosRequestConfig) => {
-    const accessToken = localStorage.getItem("token");
+    const publicPaths = ["/auth/register", "/auth/login"];
+    const isPublic = publicPaths.some((path) => config.url?.includes(path));
 
-    if (accessToken) {
-      config.headers.Authorization = `Bearer ${accessToken}`;
+    if (!isPublic) {
+      const accessToken = localStorage.getItem("token");
+      if (accessToken) {
+        config.headers.Authorization = `Bearer ${accessToken}`;
+      }
     }
 
     return config;

@@ -9,27 +9,47 @@ const generateToken = (id) => {
 
 export const registerUser = async (req, res) => {
   const { name, email, password } = req.body;
+
   try {
-    const userExists = await User.findOne({ email });
-
-    if (userExists)
+    // Check if user already exists
+    const userExists = await User.findOne({ email: email.toLowerCase() });
+    if (userExists) {
       return res.status(400).json({ message: "User already exists" });
-
-    const user = await User.create({ name, email, password });
-    if (user) {
-      res.status(201).json({
-        message: "User Created Successfully",
-        data: {
-          id: user._id,
-          name: user.name,
-          email: user.email,
-          token: generateToken(user._id),
-        },
-      });
     }
+
+    // Create new user
+    const user = await User.create({ name, email, password });
+    console.log("Created user:", user);
+
+    // Generate token safely
+    let token = "";
+    try {
+      token = generateToken(user._id);
+    } catch (err) {
+      console.error("JWT generation failed:", err);
+    }
+
+    // Respond with created user
+    return res.status(201).json({
+      message: "User Created Successfully",
+      data: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        token,
+      },
+    });
   } catch (error) {
-    console.log("Error Creating User ", error);
-    res.status(500).json({ message: "Internal Server Error" });
+    console.error("Error Creating User:", error);
+
+    // Handle mongoose validation errors
+    if (error.name === "ValidationError") {
+      const messages = Object.values(error.errors).map((val) => val.message);
+      return res.status(400).json({ message: messages.join(", ") });
+    }
+
+    // Default to 500
+    return res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
