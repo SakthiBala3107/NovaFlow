@@ -5,7 +5,7 @@ import { Eye, EyeOff, Mail, Lock, FileText, Loader2 } from 'lucide-react';
 import clsx from 'clsx';
 import { validateEmail, validatePassword } from '../../utils/helper';
 import { useLogin } from '../../hooks/UseLogin';
-import type { ApiError } from '../../types/date.types';
+import toast from 'react-hot-toast';
 
 const Login = () => {
     const { login } = useAuth();
@@ -15,7 +15,7 @@ const Login = () => {
 
     const [formData, setFormData] = useState({ email: '', password: '' });
     const [showPassword, setShowPassword] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
+    // const [isLoading, setIsLoading] = useState(false);
     const [fieldErrors, setFieldErrors] = useState<{ email?: string; password?: string }>({});
     const [touched, setTouched] = useState<{ email?: boolean; password?: boolean }>({});
 
@@ -47,29 +47,25 @@ const Login = () => {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-
         if (!isFormValid()) return;
 
         loginMutate(formData, {
             onSuccess: async (data) => {
                 if (data.user && data.token) {
-                    // Map backend _id to frontend id
-                    const userWithId = {
-                        ...data.user,
-                        id: data.user._id,
-                    };
-
+                    // Store user and token in localStorage & context
+                    const userWithId = { ...data.user, id: data.user._id ?? data.user.id };
                     await login(userWithId, data.token);
+
+                    toast.success('Login successful!', { position: 'top-center' });
                     navigate('/dashboard');
                 } else {
                     setFieldErrors({ email: data.message || 'Invalid credentials' });
                 }
             },
-            onError: (err: ApiError) => {
-                setFieldErrors({ email: err.message || 'Server error. Please try again.' });
-            },
         });
     };
+
+
 
 
 

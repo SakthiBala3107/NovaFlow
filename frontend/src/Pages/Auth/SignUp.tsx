@@ -1,44 +1,23 @@
 import React, { useState } from 'react';
-import { useAuth } from '../../context/AuthContext';
-import { useNavigate, Link } from 'react-router-dom';
+
 import { Eye, EyeOff, Mail, Lock, FileText, User } from 'lucide-react';
 import clsx from 'clsx';
 
 import { useSignup } from '../../hooks/UseLogin';
+import { type MyFormData, type FieldErrors, type TouchedFields, type ApiError } from '../../types/date.types';
+import toast from 'react-hot-toast';
+import { Link } from 'react-router-dom';
 // import { validateEmail, validatePassword } from '../../utils/helper';
 
-interface FormData {
-    name: string;
-    email: string;
-    password: string;
-    confirmPassword: string;
-    agreeToTerms: boolean;
-}
 
-interface FieldErrors {
-    name?: string;
-    email?: string;
-    password?: string;
-    confirmPassword?: string;
-    agreeToTerms?: string;
-}
-
-interface TouchedFields {
-    name?: boolean
-    email?: boolean;
-    password?: boolean;
-    confirmPassword?: boolean;
-    agreeToTerms?: boolean;
-}
 
 const SignUp = () => {
-    const { login } = useAuth();
+    // const { login } = useAuth();
 
     const { mutate: signupMutate, isLoading: isMutating } = useSignup();
 
-    const navigate = useNavigate();
 
-    const [formData, setFormData] = useState<FormData>({
+    const [formData, setFormData] = useState<MyFormData>({
         name: '',
         email: '',
         password: '',
@@ -48,7 +27,7 @@ const SignUp = () => {
 
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
-    const [isLoading, setIsLoading] = useState<boolean>(false);
+    // const [isLoading, setIsLoading] = useState<boolean>(false);
 
 
 
@@ -115,7 +94,7 @@ const SignUp = () => {
                 case "confirmPassword":
                     newFieldErrors.confirmPassword = validateConfirmPassword(
                         fieldValue as string,
-                        formData.password
+                        formData?.password
                     );
                     break;
                 case "agreeToTerms":
@@ -134,16 +113,16 @@ const SignUp = () => {
     };
 
 
-    const isFormValid = () => {
-        return (
-            formData.name &&
-            formData.email &&
-            formData.password &&
-            formData.confirmPassword &&
-            formData.agreeToTerms &&
-            Object.values(fieldErrors).every((err) => !err)
-        );
-    };
+    // const isFormValid = () => {
+    //     return (
+    //         formData.name &&
+    //         formData.email &&
+    //         formData.password &&
+    //         formData.confirmPassword &&
+    //         formData.agreeToTerms &&
+    //         Object.values(fieldErrors).every((err) => !err)
+    //     );
+    // };
 
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -178,8 +157,30 @@ const SignUp = () => {
         const hasError = Object.values(newFieldErrors).some((err) => !!err);
         if (hasError) return;
 
-        // Proceed with submission using the custom hook
-        window.location.href = '/dashboard';
+
+        //
+        const payload = {
+            name: formData.name,
+            email: formData.email,
+            password: formData.password,
+        };
+
+
+        signupMutate(payload, {
+            onSuccess: () => {
+                toast.success("Signup successful! Redirecting...");
+                // Optional small delay so user sees the toast
+                setTimeout(() => {
+                    window.location.href = '/dashboard';
+                }, 1000);
+            },
+            onError: (error: ApiError) => {
+                // If your backend returns a message
+                const message = error.message || "Signup failed. Please try again.";
+                toast.error(message);
+                console.error("Signup failed", error);
+            }
+        });
 
 
     };
@@ -204,7 +205,7 @@ const SignUp = () => {
                                 type="text"
                                 name="name"
                                 placeholder="Enter your name"
-                                value={formData.name}
+                                value={formData?.name}
                                 onChange={handleInputChange}
                                 onBlur={handleBlur}
                                 className={clsx(
