@@ -3,59 +3,9 @@ import { useMutation } from '@tanstack/react-query';
 import axiosInstance from '../utils/axiosInstance';
 import { API_PATHS } from '../utils/apiPath';
 import toast from 'react-hot-toast';
-
-interface LoginData {
-    email: string;
-    password: string;
-}
-
-interface User {
-    _id: string;
-    name: string;
-    email: string;
-    businessName?: string;
-    phone?: string;
-    address?: string;
-    createdAt?: string;
-    updatedAt?: string;
-}
-
-interface LoginResponse {
-    user: User;
-    token: string;
-    message?: string;
-}
-
-interface ApiError {
-    message: string;
-    response?: string,
-    data?: string,
-    status?: number;
-}
-
-//login post method
+import type { LoginResponse, ApiError, LoginData, SignupResponse, SignupData } from '../types/date.types';
 
 
-
-
-
-export interface SignupData {
-    name: string;
-    email: string;
-    password: string;
-}
-
-export interface SignupResponse {
-    user?: User,
-    data: {
-        id?: string;
-        // _id?: string;
-        name: string;
-        email: string;
-    };
-    token: string; // optional if already in data
-    message?: string;
-}
 
 
 
@@ -88,17 +38,6 @@ export const useLogin = () => {
             );
             return response.data;
         },
-        onSuccess: (data) => {
-            if (data.user && data.token) {
-                toast.success('Login successful!', {
-                    position: 'top-center',
-                });
-            } else {
-                toast.error(data.message || 'Invalid credentials', {
-                    position: 'top-center',
-                });
-            }
-        },
         onError: (err: ApiError) => {
             toast.error(err.message || 'Server error. Please try again.', {
                 position: 'top-center',
@@ -106,6 +45,7 @@ export const useLogin = () => {
         },
     });
 };
+
 
 
 // user signUp [POST]
