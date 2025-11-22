@@ -1,9 +1,10 @@
 // hooks/useLogin.ts
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import axiosInstance from '../utils/axiosInstance';
 import { API_PATHS } from '../utils/apiPath';
 import toast from 'react-hot-toast';
-import type { LoginResponse, ApiError, LoginData, SignupResponse, SignupData } from '../types/date.types';
+import type { LoginResponse, ApiError, LoginData, SignupResponse, SignupData, GetAllInvoicesResponse } from '../types/date.types';
+import { useAuth } from '../context/AuthContext';
 
 
 
@@ -29,22 +30,45 @@ import type { LoginResponse, ApiError, LoginData, SignupResponse, SignupData } f
 
 
 //User login [POST]
+// export const useLogin = () => {
+//     return useMutation<LoginResponse, ApiError, LoginData>({
+//         mutationFn: async (loginData: LoginData) => {
+//             const response = await axiosInstance.post<LoginResponse>(
+//                 API_PATHS.AUTH.LOGIN,
+//                 loginData
+//             );
+//             return response.data;
+//         },
+//         onError: (err: ApiError) => {
+//             toast.error(err.message || 'Server error. Please try again.', {
+//                 position: 'top-center',
+//             });
+//         },
+//     });
+// };
+
 export const useLogin = () => {
+    const { login } = useAuth();
+
     return useMutation<LoginResponse, ApiError, LoginData>({
-        mutationFn: async (loginData: LoginData) => {
-            const response = await axiosInstance.post<LoginResponse>(
-                API_PATHS.AUTH.LOGIN,
-                loginData
-            );
-            return response.data;
+        mutationFn: (data) =>
+            axiosInstance.post<LoginResponse>(API_PATHS.AUTH.LOGIN, data).then(res => res.data),
+
+        onSuccess: async (data) => {
+            if (!data.token || !data.user) {
+                return toast.error(data.message || "Invalid credentials");
+            }
+
+            await login(data.user, data.token);
+            toast.success("Login successful!");
         },
-        onError: (err: ApiError) => {
-            toast.error(err.message || 'Server error. Please try again.', {
-                position: 'top-center',
-            });
+
+        onError: (err) => {
+            toast.error(err?.message || "Server error. Try again.");
         },
     });
 };
+
 
 
 
@@ -66,5 +90,31 @@ export const useSignup = () => {
                 err.message || 'Signup failed. Please try again.';
             toast.error(message, { position: 'top-center' });
         },
+    });
+};
+
+
+//DAHSBOARD-STUFFS
+
+//Get all the invoice details
+
+
+
+// ---------- Hook ----------
+export const useGetAllInvoices = () => {
+    return useQuery<GetAllInvoicesResponse>({
+        queryKey: ["invoices"],
+
+        queryFn: async () => {
+            const response = await axiosInstance.get<GetAllInvoicesResponse>(
+                API_PATHS.INVOICE.GET_ALL_INVOICES
+            );
+
+            return response.data;
+        },
+
+        // onError: (error:ApiError ) => {
+        //   toast.error(error?.message || "Failed to fetch invoices.");
+        // },
     });
 };

@@ -1,23 +1,24 @@
-export const BASE_URL = "http://localhost:8000" as const;
+export const BASE_URL = "http://localhost:8000/" as const;
 
 export const API_PATHS = {
   AUTH: {
-    REGISTER: "api/auth/register",
+    REGISTER: "/api/auth/register",
     LOGIN: "/api/auth/login",
     GET_PROFILE: "/api/auth/me",
     UPDATE_PROFILE: "/api/auth/me",
   },
+
   INVOICE: {
-    CREATE: "/api/invoices/",
-    GET_ALL_INVOICES: "/api/invoices/",
-    GET_INVOICE_BY_ID: (id: string | number) => `/api/invoices/${id}`,
-    UPDATE_INVOICE: (id: string | number) => `/api/invoices/${id}`,
-    DELETE_INVOICE: (id: string | number) => `/api/invoices/${id}`,
+    CREATE: "/invoices/",
+    GET_ALL_INVOICES: "/invoices/",
+    GET_INVOICE_BY_ID: (id: string | number) => `/invoices/${id}`,
+    UPDATE_INVOICE: (id: string | number) => `/invoices/${id}`,
+    DELETE_INVOICE: (id: string | number) => `/invoices/${id}`,
   },
   AI: {
-    PARSE_INVOICE_TEXT: "/api/ai/parse-text",
-    GENERATE_REMINDER: "/api/ai/generate-reminder",
-    GET_DASHBOARD_SUMMARY: "/api/ai/dashboard-summary",
+    PARSE_INVOICE_TEXT: "/ai/parse-text",
+    GENERATE_REMINDER: "/ai/generate-reminder",
+    GET_DASHBOARD_SUMMARY: "/ai/dashboard-summary",
   },
 } as const;
 

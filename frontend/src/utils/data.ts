@@ -1,5 +1,18 @@
-import { Sparkles, BarChart2, Mail, FileText } from "lucide-react";
-import type { FAQ, Feature, Testimonial } from "../types/date.types";
+import {
+  Sparkles,
+  BarChart2,
+  Mail,
+  FileText,
+  Plus,
+  LayoutDashboard,
+  Users,
+} from "lucide-react";
+import type {
+  FAQ,
+  Feature,
+  NavigationItem,
+  Testimonial,
+} from "../types/date.types";
 
 export const FEATURES: Feature[] = [
   {
@@ -83,4 +96,11 @@ export const FAQS: FAQ[] = [
     answer:
       "No. You can extract and preview invoice details without an account. However, creating an account enables saving history, syncing, and advanced features.",
   },
+];
+
+export const NAVIGATION_MENU: NavigationItem[] = [
+  { id: "dashboard", name: "Dashboard", icon: LayoutDashboard },
+  { id: "invoices", name: "Invoices", icon: FileText },
+  { id: "invoices/new", name: "CreateInvoice", icon: Plus },
+  { id: "profile", name: "Profile", icon: Users },
 ];

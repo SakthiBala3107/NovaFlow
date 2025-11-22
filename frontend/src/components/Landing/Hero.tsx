@@ -19,7 +19,7 @@ const Hero = () => {
                     <div className="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
                         {isAuthenticated ?
                             (<Link
-                                className="bg-linear-to-r from-blue-950 to-blue-900 text-white px-8 py04 rounded-xl font-bold text-base sm:text-lg hover:bg-blue-900 transition-all duration-200 hover:scale-105 hover:shadow-2xl transform"
+                                className="bg-linear-to-r from-blue-950 to-blue-900 text-white px-8 py-4 rounded-xl font-bold text-base sm:text-lg hover:bg-blue-900 transition-all duration-200 hover:scale-105 hover:shadow-2xl transform"
                                 to={'/dashboard'}>Got to Dashboard</Link>)
                             : (<Link
 
@@ -35,7 +35,7 @@ const Hero = () => {
                 </div>
                 {/*  */}
                 <div className="mt-12 relative max-w-5xl mx-auto">
-                    <img src="" alt="" className=" rounded-2xl shadow-2xl shadow-gray-300 border-4 border-gray-200/20" />
+                    <img src="../nothing" alt="" className=" rounded-2xl shadow-2xl shadow-gray-300 border-4 border-gray-200/20" />
                 </div>
             </div>
             {/*  */}

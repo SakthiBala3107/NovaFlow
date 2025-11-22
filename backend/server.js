@@ -25,7 +25,7 @@ app.use(
 
 // ROUTES
 app.use("/api/auth", authRouter);
-app.use("/api/invoice", AuthMiddleWare, invoiceRouter);
+app.use("/api/invoices", AuthMiddleWare, invoiceRouter);
 app.use("/api/ai", AuthMiddleWare, AI_Router);
 
 // Home

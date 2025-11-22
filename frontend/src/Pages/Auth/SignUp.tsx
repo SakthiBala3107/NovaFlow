@@ -4,17 +4,19 @@ import { Eye, EyeOff, Mail, Lock, FileText, User } from 'lucide-react';
 import clsx from 'clsx';
 
 import { useSignup } from '../../hooks/UseLogin';
-import { type MyFormData, type FieldErrors, type TouchedFields, type ApiError } from '../../types/date.types';
+import { type MyFormData, type FieldErrors, type TouchedFields, } from '../../types/date.types';
 import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 // import { validateEmail, validatePassword } from '../../utils/helper';
 
 
 
 const SignUp = () => {
-    // const { login } = useAuth();
+    const { login, } = useAuth();
 
-    const { mutate: signupMutate, isLoading: isMutating } = useSignup();
+
+    const { mutate: signupMutate, isPending: isMutating } = useSignup();
 
 
     const [formData, setFormData] = useState<MyFormData>({
@@ -167,23 +169,25 @@ const SignUp = () => {
 
 
         signupMutate(payload, {
-            onSuccess: () => {
+            onSuccess: (res) => {
+                const { data } = res; // <- this matches backend 'data'
                 toast.success("Signup successful! Redirecting...");
-                // Optional small delay so user sees the toast
+                login({ id: data?.id, name: data?.name, email: data?.email }, data?.token);
                 setTimeout(() => {
                     window.location.href = '/dashboard';
                 }, 1000);
-            },
-            onError: (error: ApiError) => {
-                // If your backend returns a message
-                const message = error.message || "Signup failed. Please try again.";
-                toast.error(message);
-                console.error("Signup failed", error);
             }
         });
 
 
+
     };
+
+    if (isMutating) return (<div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
+        <div className="loader">Loading...</div>
+    </div>)
+
+
 
 
     return (
