@@ -1,5 +1,5 @@
 import type { LucideIcon } from "lucide-react";
-import type { ReactNode } from "react";
+import type { InputHTMLAttributes, ReactNode } from "react";
 
 //testtimonal stuffs
 export interface NavigationItem {
@@ -188,4 +188,52 @@ export interface Invoice {
 export interface GetAllInvoicesResponse {
   invoices: Invoice[];
   message?: string;
+}
+
+export type InsightsState = string[] | number[] | null;
+
+export interface DashboardSummary {
+  success?: boolean | null;
+  provider?: string | null;
+  message?: string | null;
+  data?: {
+    totalInvoices?: number | null;
+    paidInvoices?: number | null;
+    unpaidInvoices?: number | null;
+    totalRevenue?: number | null;
+    totalOutstanding?: number | null;
+
+    recentInvoices?: Array<{
+      id?: string | null;
+      invoiceNumber?: string | null;
+      total?: number | null;
+      status?: string | null;
+      date?: string | null;
+    }> | null;
+
+    insights?: string[] | null;
+
+    summaryText?: string | null;
+  } | null;
+}
+
+export interface InputFieldProps extends InputHTMLAttributes<HTMLInputElement> {
+  label: string;
+  name: string;
+  icon?: LucideIcon;
+}
+
+export type SelectOption =
+  | string
+  | {
+      label?: string | null;
+      value?: string | null;
+    }
+  | null;
+
+export interface SelectedFieldProps
+  extends React.SelectHTMLAttributes<HTMLSelectElement> {
+  label: string;
+  name: string;
+  options?: SelectOption[] | null;
 }

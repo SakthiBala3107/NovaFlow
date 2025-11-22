@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Eye, EyeOff, Mail, Lock, FileText, User } from 'lucide-react';
 import clsx from 'clsx';
 
-import { useSignup } from '../../hooks/UseLogin';
+import { useSignup } from '../../hooks/UseQueries';
 import { type MyFormData, type FieldErrors, type TouchedFields, } from '../../types/date.types';
 import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';

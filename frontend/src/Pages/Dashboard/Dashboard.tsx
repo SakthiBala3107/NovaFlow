@@ -1,12 +1,13 @@
 import { useMemo } from "react";
 import { DollarSign, FileText, Plus } from "lucide-react";
 import type { ColorMap, StatsItem } from "../../types/date.types";
-import { useGetAllInvoices } from "../../hooks/UseLogin";
+import { useGetAllInvoices } from "../../hooks/UseQueries";
 import toast from "react-hot-toast";
 import moment from 'moment'
 import clsx from "clsx";
 import Button from "../../components/ui/Button";
 import { useNavigate } from "react-router-dom";
+import AiInsightsCard from "../../components/ui/AiInsightsCard";
 
 const Dashboard = () => {
 
@@ -82,7 +83,7 @@ const Dashboard = () => {
 
     return (
         recentInvoices?.length > 0 ? (
-            <div className="space-y-8 mb-96">
+            <div className="space-y-8 ">
 
                 <div>
                     <h2 className="text-xl font-semibold text-slate-900">Dashboard</h2>
@@ -111,6 +112,10 @@ const Dashboard = () => {
                         </div>
                     ))}
                 </div>
+
+                {/* AI InsightCard */}
+
+                <AiInsightsCard />
 
                 {/* Recent Invoices */}
                 <div className="w-full bg-white border border-slate-200 rounded-lg shadow-sm shadow-gray-100 overflow-hidden">

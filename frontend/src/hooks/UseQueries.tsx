@@ -3,7 +3,7 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import axiosInstance from '../utils/axiosInstance';
 import { API_PATHS } from '../utils/apiPath';
 import toast from 'react-hot-toast';
-import type { LoginResponse, ApiError, LoginData, SignupResponse, SignupData, GetAllInvoicesResponse } from '../types/date.types';
+import type { LoginResponse, ApiError, LoginData, SignupResponse, SignupData, GetAllInvoicesResponse, DashboardSummary } from '../types/date.types';
 import { useAuth } from '../context/AuthContext';
 
 
@@ -118,3 +118,30 @@ export const useGetAllInvoices = () => {
         // },
     });
 };
+
+
+//AI-AUERIES
+
+export const useDashboardSummary = () => {
+    return useQuery<DashboardSummary>({
+        queryKey: ["dashboard-summary"],
+        queryFn: async () => {
+            const response = await axiosInstance.get(
+                API_PATHS.AI.GET_DASHBOARD_SUMMARY
+            );
+            return response.data;
+        },
+    });
+};
+
+
+
+//INVOICES
+// export const useGetAllInvoices = () =>
+//   useQuery({
+//     queryKey: ["invoices"],
+//     queryFn: async () => {
+//       const res = await axiosInstance.get(API_PATHS.INVOICE.GET_ALL_INVOICES);
+//       return res.data;
+//     },
+//   });

@@ -4,7 +4,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, FileText, Loader2 } from 'lucide-react';
 import clsx from 'clsx';
 import { validateEmail, validatePassword } from '../../utils/helper';
-import { useLogin } from '../../hooks/UseLogin';
+import { useLogin } from '../../hooks/UseQueries';
 import toast from 'react-hot-toast';
 
 const Login = () => {
