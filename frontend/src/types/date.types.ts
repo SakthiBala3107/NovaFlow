@@ -235,5 +235,90 @@ export interface SelectedFieldProps
   extends React.SelectHTMLAttributes<HTMLSelectElement> {
   label: string;
   name: string;
+  icon?: LucideIcon;
   options?: SelectOption[] | null;
+}
+
+export type TextFieldAreaProps = {
+  label?: string | null;
+  name: string;
+  icon?: LucideIcon | null;
+} & React.TextareaHTMLAttributes<HTMLTextAreaElement>;
+
+export interface InvoiceItem {
+  name: string;
+  quantity: number;
+  unitPrice: number;
+  taxPercent: number;
+}
+
+export interface InvoiceParty {
+  businessName?: string;
+  email?: string;
+  address?: string;
+  phone?: string;
+  clientName?: string;
+  clientEmail?: string;
+  clientAddress?: string;
+}
+
+// export interface InvoiceType {
+//   invoiceNumber: string;
+//   invoiceDate: string;
+//   dueDate: string;
+//   billFrom: InvoiceParty;
+//   billTo: InvoiceParty;
+//   items: InvoiceItem[];
+//   notes?: string;
+//   paymentTerms?: string;
+// }
+
+export interface InvoiceBillFrom {
+  businessName: string;
+  email: string;
+  address: string;
+  phone: string;
+}
+
+export interface InvoiceBillTo {
+  clientName: string;
+  email: string;
+  address: string;
+  phone: string;
+}
+
+export interface InvoiceItem {
+  name: string;
+  quantity: number;
+  unitPrice: number;
+  taxPercent: number;
+}
+
+export interface InvoiceType {
+  invoiceNumber: string;
+  invoiceDate: string;
+  dueDate: string;
+  billFrom: InvoiceBillFrom;
+  billTo: InvoiceBillTo;
+  items: InvoiceItem[];
+  notes: string;
+  paymentTerms: string;
+}
+
+export interface InvoicePayload {
+  invoiceNumber: string;
+  invoiceDate: string;
+  dueDate: string;
+
+  billFrom: InvoiceParty;
+  billTo: InvoiceParty;
+
+  items: InvoiceItem[];
+
+  subtotal: number;
+  taxTotal: number;
+  total: number;
+
+  notes?: string;
+  paymentTerms?: string;
 }
