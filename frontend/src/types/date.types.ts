@@ -1,7 +1,8 @@
 import type { LucideIcon } from "lucide-react";
 import type { InputHTMLAttributes, ReactNode } from "react";
 
-//testtimonal stuffs
+/* ------------------- NAVIGATION / UI STUFF ------------------- */
+
 export interface NavigationItem {
   id: number;
   name: string;
@@ -10,9 +11,8 @@ export interface NavigationItem {
 
 export interface NavigationItemProps {
   item: NavigationItem;
-
   isActive: boolean;
-  onClick: (id: number) => void; // <-- FIXED
+  onClick: (id: number) => void;
   isCollapsed: boolean;
 }
 
@@ -34,77 +34,15 @@ export type FAQ = {
   answer: string;
 };
 
-export interface User {
-  id: number | string;
+/* ------------------- GENERAL USER TYPES ------------------- */
+
+export interface BaseUser {
+  id?: string | number;
+  _id?: string;
   name: string;
   email: string;
-  token?: number | string; // optional, but you can include
+  token?: string | number;
   avatar?: string;
-  businessName?: string;
-  phone?: string;
-  address?: string;
-}
-
-//zustand auth
-export interface AuthContextType {
-  user: User | null;
-  isLoading: boolean;
-  isAuthenticated?: boolean;
-  toggleIsAuthenticated: () => void;
-  checkAuthStatus: () => Promise<void>;
-  login: (userData: User, token: string) => Promise<void>;
-  logout: () => Promise<void>;
-  updateUser: (updateUserData: Partial<User>) => Promise<void>;
-}
-
-export interface ApiError {
-  message: string;
-}
-
-// signup-page----------------//
-
-export interface MyFormData {
-  name: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  agreeToTerms: boolean;
-}
-
-export interface FormData {
-  name: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  agreeToTerms: boolean;
-}
-
-export interface FieldErrors {
-  name?: string;
-  email?: string;
-  password?: string;
-  confirmPassword?: string;
-  agreeToTerms?: string;
-}
-
-export interface TouchedFields {
-  name?: boolean;
-  email?: boolean;
-  password?: boolean;
-  confirmPassword?: boolean;
-  agreeToTerms?: boolean;
-}
-
-//LOGIN
-export interface LoginData {
-  email: string;
-  password: string;
-}
-
-export interface User {
-  _id: string;
-  name: string;
-  email: string;
   businessName?: string;
   phone?: string;
   address?: string;
@@ -112,10 +50,17 @@ export interface User {
   updatedAt?: string;
 }
 
-export interface LoginResponse {
-  user: User;
-  token: string;
-  message?: string;
+/* ------------------- AUTH / LOGIN ------------------- */
+
+export interface AuthContextType {
+  user: BaseUser | null;
+  isLoading: boolean;
+  isAuthenticated?: boolean;
+  toggleIsAuthenticated: () => void;
+  checkAuthStatus: () => Promise<void>;
+  login: (userData: BaseUser, token: string) => Promise<void>;
+  logout: () => Promise<void>;
+  updateUser: (updateUserData: Partial<BaseUser>) => Promise<void>;
 }
 
 export interface ApiError {
@@ -125,7 +70,17 @@ export interface ApiError {
   status?: number;
 }
 
-//login post method
+export interface LoginData {
+  email: string;
+  password: string;
+}
+
+export interface LoginResponse {
+  user: BaseUser;
+  token: string;
+  message?: string;
+}
+
 export interface SignupData {
   name: string;
   email: string;
@@ -133,26 +88,24 @@ export interface SignupData {
 }
 
 export interface SignupResponse {
-  user?: User;
+  user?: BaseUser;
   data: {
     id?: string;
-    // _id?: string;
     name: string;
     email: string;
   };
-  token: number | string; // optional if already in data
+  token: number | string;
   message?: string;
 }
 
 export interface AuthProviderProps {
   children: ReactNode;
 }
-export type LayoutProps = {
-  children: ReactNode;
-  activeMenu?: string | string[];
-};
+
+/* ------------------- DASHBOARD / STATS ------------------- */
 
 export type SidebarState = string | string[] | number | boolean;
+
 export type StatsState = {
   totalInvoices: number | string;
   totalPaid: number | string;
@@ -175,18 +128,20 @@ export type ColorMap = {
   [key in "blue" | "emerald" | "red"]: ColorClass;
 };
 
-export interface Invoice {
+/* ------------------- DASHBOARD PREVIEW INVOICE ------------------- */
+
+export interface DashboardInvoice {
   _id: string;
   title: string;
   amount: number;
   total: number;
   status: "paid" | "unpaid" | "pending";
   createdAt: string;
-  invoiceDate?: string; // <-- REQUIRED
+  invoiceDate?: string;
 }
 
 export interface GetAllInvoicesResponse {
-  invoices: Invoice[];
+  invoices: DashboardInvoice[];
   message?: string;
 }
 
@@ -217,6 +172,8 @@ export interface DashboardSummary {
   } | null;
 }
 
+/* ------------------- INPUT COMPONENT PROPS ------------------- */
+
 export interface InputFieldProps extends InputHTMLAttributes<HTMLInputElement> {
   label: string;
   name: string;
@@ -225,10 +182,7 @@ export interface InputFieldProps extends InputHTMLAttributes<HTMLInputElement> {
 
 export type SelectOption =
   | string
-  | {
-      label?: string | null;
-      value?: string | null;
-    }
+  | { label?: string | null; value?: string | null }
   | null;
 
 export interface SelectedFieldProps
@@ -245,73 +199,65 @@ export type TextFieldAreaProps = {
   icon?: LucideIcon | null;
 } & React.TextareaHTMLAttributes<HTMLTextAreaElement>;
 
+/* ------------------- API INVOICE SCHEMA (REAL BACKEND) ------------------- */
+
 export interface InvoiceItem {
-  name: string;
+  _id: string;
   quantity: number;
   unitPrice: number;
   taxPercent: number;
+  total: number;
 }
 
-export interface InvoiceParty {
+export interface BillInfo {
   businessName?: string;
-  email?: string;
-  address?: string;
-  phone?: string;
   clientName?: string;
-  clientEmail?: string;
-  clientAddress?: string;
-}
-
-// export interface InvoiceType {
-//   invoiceNumber: string;
-//   invoiceDate: string;
-//   dueDate: string;
-//   billFrom: InvoiceParty;
-//   billTo: InvoiceParty;
-//   items: InvoiceItem[];
-//   notes?: string;
-//   paymentTerms?: string;
-// }
-
-export interface InvoiceBillFrom {
-  businessName: string;
   email: string;
   address: string;
   phone: string;
 }
 
-export interface InvoiceBillTo {
-  clientName: string;
-  email: string;
-  address: string;
-  phone: string;
-}
-
-export interface InvoiceItem {
+export interface InvoiceUser {
+  _id: string;
   name: string;
-  quantity: number;
-  unitPrice: number;
-  taxPercent: number;
+  email: string;
 }
 
 export interface InvoiceType {
+  _id: string;
+  user: InvoiceUser;
+
+  billFrom: BillInfo;
+  billTo: BillInfo;
+
   invoiceNumber: string;
   invoiceDate: string;
-  dueDate: string;
-  billFrom: InvoiceBillFrom;
-  billTo: InvoiceBillTo;
+  dueDate: string | null;
+
   items: InvoiceItem[];
+
   notes: string;
   paymentTerms: string;
+  status: "Paid" | "Unpaid" | "Overdue" | "Pending";
+
+  subtotal: number;
+  taxTotal: number;
+  total: number;
+
+  createdAt: string;
+  updatedAt: string;
+  __v: number;
 }
+
+/* ------------------- CREATE INVOICE PAYLOAD ------------------- */
 
 export interface InvoicePayload {
   invoiceNumber: string;
   invoiceDate: string;
-  dueDate: string;
+  dueDate: string | null;
 
-  billFrom: InvoiceParty;
-  billTo: InvoiceParty;
+  billFrom: BillInfo;
+  billTo: BillInfo;
 
   items: InvoiceItem[];
 
@@ -321,4 +267,21 @@ export interface InvoicePayload {
 
   notes?: string;
   paymentTerms?: string;
+}
+
+/* ------------------- MODAL PROPS ------------------- */
+export interface AIModalProps {
+  isOpen: boolean;
+  onclose: () => void;
+  invoiceId?: string | number | undefined;
+}
+
+export interface DeleteConfirmModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}
+
+export interface InvoiceStatusPayload {
+  status: "Paid" | "Unpaid" | "Overdue" | "Pending";
 }

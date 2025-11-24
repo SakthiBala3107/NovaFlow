@@ -1,9 +1,9 @@
 // hooks/useLogin.ts
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axiosInstance from '../utils/axiosInstance';
 import { API_PATHS } from '../utils/apiPath';
 import toast from 'react-hot-toast';
-import type { LoginResponse, ApiError, LoginData, SignupResponse, SignupData, GetAllInvoicesResponse, DashboardSummary, InvoicePayload } from '../types/date.types';
+import type { LoginResponse, ApiError, LoginData, SignupResponse, SignupData, GetAllInvoicesResponse, DashboardSummary, InvoicePayload, InvoiceType } from '../types/date.types';
 import { useAuth } from '../context/AuthContext';
 
 
@@ -103,7 +103,7 @@ export const useSignup = () => {
 // ---------- Hook ----------
 export const useGetAllInvoices = () => {
     return useQuery<GetAllInvoicesResponse>({
-        queryKey: ["invoices"],
+        queryKey: ["invoices-all"],
 
         queryFn: async () => {
             const response = await axiosInstance.get<GetAllInvoicesResponse>(
@@ -148,3 +148,68 @@ export const useCreateInvoice = () => {
         },
     });
 };
+
+
+//
+// src/hooks/useGetInvoices.ts
+
+
+export const useGetInvoices = () => {
+    return useQuery<InvoiceType[]>({
+        queryKey: ["invoices-list"],
+        queryFn: async () => {
+            const res = await axiosInstance.get<InvoiceType[]>(
+                API_PATHS.INVOICE.GET_ALL_INVOICES
+            );
+
+            return res.data?.sort(
+                (a, b) =>
+                    new Date(b.invoiceDate).getTime() -
+                    new Date(a.invoiceDate).getTime()
+            );
+        },
+    });
+};
+
+
+//delete a invoice
+
+export const useDeleteInvoice = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async (id: string) => {
+            const res = await axiosInstance.delete(
+                API_PATHS.INVOICE.DELETE_INVOICE(id)
+            );
+            return res.data;
+        },
+
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["invoices"] });
+        },
+    });
+};
+
+// update a invoice
+
+export const useUpdateInvoice = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({ id, data }) => {
+            const res = await axiosInstance.put(
+                API_PATHS.INVOICE.UPDATE_INVOICE(id),
+                data
+            );
+            return res.data;
+        },
+
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["invoices-all"] });
+            queryClient.invalidateQueries({ queryKey: ["invoices-list"] });
+        },
+    });
+};
+
+

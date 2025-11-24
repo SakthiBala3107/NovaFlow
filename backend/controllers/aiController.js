@@ -5,7 +5,7 @@ import { ENV } from "../config/env.js";
 
 // Initialize Providers
 const genAi = new GoogleGenAI({ apiKey: ENV?.GEMINI_API_KEY });
-const openai = new OpenAI({ apiKey: ENV?.OPEN_AI_API_KEY });
+const openai = new OpenAI({ apiKey: ENV?.OPENAI_API_KEY });
 const genAiModel = "models/gemini-2.0-flash"; // safer than 1.5-flash
 
 // --------------------------------------------

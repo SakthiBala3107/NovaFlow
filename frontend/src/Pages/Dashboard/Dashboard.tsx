@@ -13,32 +13,20 @@ const Dashboard = () => {
     const navigate = useNavigate();
     const { data: invoiceData, isLoading: isFetching, error } = useGetAllInvoices();
 
-    //  Use the array directly
     const Invoices = invoiceData ?? [];
 
     // Derived stats
-    const totalInvoices = Invoices?.length ?? 0;
-    const totalPaid = Invoices?.filter?.(inv => inv?.status === "paid")?.reduce((acc, inv) => acc + (inv?.total ?? 0), 0) ?? 0;
-    const totalUnpaid = Invoices?.filter?.(inv => inv?.status === "unpaid")?.reduce((acc, inv) => acc + (inv?.total ?? 0), 0) ?? 0;
-    const stats = { totalInvoices, totalPaid, totalUnpaid };
+    const totalInvoices = Invoices?.length;
+    const totalPaid = Invoices?.filter(inv => inv?.status?.toLowerCase() === "paid")
+        .reduce((acc, inv) => acc + (inv?.total ?? 0), 0);
+    const totalUnpaid = Invoices.filter(inv => inv?.status?.toLowerCase() !== "paid")
+        .reduce((acc, inv) => acc + (inv?.total ?? 0), 0);
 
-    // Recent invoices — safe
-    const recentInvoices = useMemo(() => {
-        return [...(Invoices ?? [])]
-            .sort((a, b) => {
-                const dateA = new Date(a?.invoiceDate ?? "1970-01-01");
-                const dateB = new Date(b?.invoiceDate ?? "1970-01-01");
-                return dateB.getTime() - dateA.getTime();
-            })
-            .slice(0, 5);
-    }, [Invoices]);
-
-    const statsData: StatsItem[] = [
-        { icon: FileText, label: "Total Invoices", value: stats?.totalInvoices, color: "blue" },
-        { icon: DollarSign, label: "Total Paid", value: stats?.totalPaid, color: "emerald" },
-        { icon: DollarSign, label: "Total Unpaid", value: stats?.totalUnpaid, color: "red" },
+    const stats: StatsItem[] = [
+        { icon: FileText, label: "Total Invoices", value: totalInvoices, color: "blue" },
+        { icon: DollarSign, label: "Total Paid", value: totalPaid, color: "emerald" },
+        { icon: DollarSign, label: "Total Unpaid", value: totalUnpaid, color: "red" },
     ];
-
 
     const colorClasses: ColorMap = {
         blue: { bg: 'bg-blue-100', text: "text-blue-600" },
@@ -46,7 +34,14 @@ const Dashboard = () => {
         red: { bg: 'bg-red-100', text: "text-red-600" },
     };
 
-    // 🔵 SKELETON LOADING
+    // Recent invoices
+    const recentInvoices = useMemo(() => {
+        return [...Invoices]
+            .sort((a, b) => new Date(b?.invoiceDate ?? 0).getTime() - new Date(a?.invoiceDate ?? 0).getTime())
+            .slice(0, 5);
+    }, [Invoices]);
+
+    // 🔵 Skeleton loading
     if (isFetching) {
         return (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-4">
@@ -65,7 +60,7 @@ const Dashboard = () => {
         );
     }
 
-    // 🔴 ERROR UI
+    // 🔴 Error
     if (error) {
         toast.error("Failed to load invoices. Please try again.");
         return (
@@ -76,42 +71,36 @@ const Dashboard = () => {
     }
 
     return (
-        recentInvoices?.length > 0 ? (
+        recentInvoices.length > 0 ? (
             <div className="space-y-8 ">
-
                 <div>
                     <h2 className="text-xl font-semibold text-slate-900">Dashboard</h2>
                     <p className="text-sm text-slate-600 mt-1">A quick overview of your business finances.</p>
                 </div>
 
-                {/* Stats */}
+                {/* Stats Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {statsData.map((stat, idx) => (
+                    {stats.map((stat, idx) => (
                         <div key={idx} className="bg-white p-4 rounded-xl border border-slate-200 shadow-lg shadow-gray-100">
                             <div className="flex items-center">
                                 <div className={clsx("shrink-0 w-12 h-12 rounded-lg flex items-center justify-center", colorClasses[stat.color]?.bg)}>
                                     <stat.icon className={clsx("w-6 h-6", colorClasses[stat.color]?.text)} />
                                 </div>
-
                                 <div className="ml-4 min-w-0">
                                     <div className="text-sm font-medium text-slate-500 truncate">{stat.label}</div>
-
-                                    {stat.value === 0 ? (
-                                        <div className="text-slate-400 text-lg italic">No data</div>
-                                    ) : (
-                                        <div className="text-2xl font-bold text-slate-900 break-all">{stat.value}</div>
-                                    )}
-
+                                    <div className="text-2xl font-bold text-slate-900 break-all">
+                                        {stat.value}
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     ))}
                 </div>
 
-                {/* AI InsightCard */}
+                {/* AI Insight Card */}
                 <AiInsightsCard />
 
-                {/* Recent Invoices */}
+                {/* Recent Invoices Table */}
                 <div className="w-full bg-white border border-slate-200 rounded-lg shadow-sm shadow-gray-100 overflow-hidden">
                     <div className="px-4 sm:px-6 py-4 border-b border-slate-200 bg-slate-50 flex justify-between items-center">
                         <h3 className="text-lg font-semibold text-slate-900">Recent Invoices</h3>
@@ -130,8 +119,8 @@ const Dashboard = () => {
                         <tbody className="bg-white divide-y divide-slate-200">
                             {recentInvoices.map(invoice => (
                                 <tr
-                                    className="hover:bg-slate-50 cursor-pointer"
                                     key={invoice?._id}
+                                    className="hover:bg-slate-50 cursor-pointer"
                                     onClick={() => navigate(`/invoices/${invoice?._id}`)}
                                 >
                                     <td className="px-6 py-4 whitespace-nowrap">
@@ -149,7 +138,7 @@ const Dashboard = () => {
                                             invoice.status === "paid"
                                                 ? "bg-emerald-100 text-emerald-800"
                                                 : invoice.status === "pending"
-                                                    ? "bg-amber-100"
+                                                    ? "bg-amber-100 text-amber-800"
                                                     : "bg-red-100 text-red-800"
                                         )}>
                                             {invoice.status}
@@ -164,8 +153,6 @@ const Dashboard = () => {
                         </tbody>
                     </table>
                 </div>
-
-
             </div>
         ) : (
             <div className="flex flex-col items-center justify-center py-12 text-center">
