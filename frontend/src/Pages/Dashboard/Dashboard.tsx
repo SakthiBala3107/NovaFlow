@@ -131,12 +131,12 @@ const Dashboard = () => {
                             {recentInvoices.map(invoice => (
                                 <tr
                                     className="hover:bg-slate-50 cursor-pointer"
-                                    key={invoice._id}
-                                    onClick={() => navigate(`/invoices/${invoice._id}`)}
+                                    key={invoice?._id}
+                                    onClick={() => navigate(`/invoices/${invoice?._id}`)}
                                 >
                                     <td className="px-6 py-4 whitespace-nowrap">
-                                        <div className="text-sm font-medium text-slate-900">{invoice.billTo?.clientName}</div>
-                                        <div className="text-sm text-slate-500">#{invoice.invoiceNumber}</div>
+                                        <div className="text-sm font-medium text-slate-900">{invoice?.billTo?.clientName}</div>
+                                        <div className="text-sm text-slate-500">#{invoice?.invoiceNumber}</div>
                                     </td>
 
                                     <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-800">

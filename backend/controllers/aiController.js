@@ -6,32 +6,21 @@ import { ENV } from "../config/env.js";
 // Initialize Providers
 const genAi = new GoogleGenAI({ apiKey: ENV?.GEMINI_API_KEY });
 const openai = new OpenAI({ apiKey: ENV?.OPEN_AI_API_KEY });
+const genAiModel = "models/gemini-2.0-flash"; // safer than 1.5-flash
 
 // --------------------------------------------
 // GEMINI — FIXED response parsing
 // --------------------------------------------
 async function parseWithGemini(prompt) {
   const response = await genAi.models.generateContent({
-    model: "gemini-1.5-flash",
+    model: genAiModel,
     contents: prompt,
   });
 
-  const text = response?.response?.text();
+  const text = response?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+
   if (!text) throw new Error("Gemini failed to return text");
-  return text;
-}
 
-// --------------------------------------------
-// OPENAI
-// --------------------------------------------
-async function parseWithOpenAI(prompt) {
-  const response = await openai.chat.completions.create({
-    model: "gpt-4.1-mini",
-    messages: [{ role: "user", content: prompt }],
-  });
-
-  const text = response?.choices?.[0]?.message?.content;
-  if (!text) throw new Error("OpenAI failed to return text");
   return text;
 }
 
@@ -89,17 +78,23 @@ ${text}
 };
 
 // Generate Reminder Email — Gemini FIXED
+
 // --------------------------------------------
 async function generateWithGemini(prompt) {
   const response = await genAi.models.generateContent({
-    model: "gemini-1.5-flash",
+    model: genAiModel,
     contents: prompt,
   });
 
-  const text = response?.response?.text();
+  // Safe extraction from current SDK response structure
+  const text = response?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+
   if (!text) throw new Error("Gemini failed to return text");
+
   return text;
 }
+
+//
 
 async function generateWithOpenAI(prompt) {
   const response = await openai.chat.completions.create({
