@@ -5,33 +5,22 @@ import { ENV } from "../config/env.js";
 
 // Initialize Providers
 const genAi = new GoogleGenAI({ apiKey: ENV?.GEMINI_API_KEY });
-const openai = new OpenAI({ apiKey: ENV?.OPEN_AI_API_KEY });
+const openai = new OpenAI({ apiKey: ENV?.OPENAI_API_KEY });
+const genAiModel = "models/gemini-2.0-flash"; // safer than 1.5-flash
 
 // --------------------------------------------
 // GEMINI — FIXED response parsing
 // --------------------------------------------
 async function parseWithGemini(prompt) {
   const response = await genAi.models.generateContent({
-    model: "gemini-1.5-flash",
+    model: genAiModel,
     contents: prompt,
   });
 
-  const text = response?.response?.text();
+  const text = response?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+
   if (!text) throw new Error("Gemini failed to return text");
-  return text;
-}
 
-// --------------------------------------------
-// OPENAI
-// --------------------------------------------
-async function parseWithOpenAI(prompt) {
-  const response = await openai.chat.completions.create({
-    model: "gpt-4.1-mini",
-    messages: [{ role: "user", content: prompt }],
-  });
-
-  const text = response?.choices?.[0]?.message?.content;
-  if (!text) throw new Error("OpenAI failed to return text");
   return text;
 }
 
@@ -89,17 +78,23 @@ ${text}
 };
 
 // Generate Reminder Email — Gemini FIXED
+
 // --------------------------------------------
 async function generateWithGemini(prompt) {
   const response = await genAi.models.generateContent({
-    model: "gemini-1.5-flash",
+    model: genAiModel,
     contents: prompt,
   });
 
-  const text = response?.response?.text();
+  // Safe extraction from current SDK response structure
+  const text = response?.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+
   if (!text) throw new Error("Gemini failed to return text");
+
   return text;
 }
+
+//
 
 async function generateWithOpenAI(prompt) {
   const response = await openai.chat.completions.create({
@@ -168,14 +163,13 @@ Rules:
 //
 // DASHBOARD SUMMARY + AI INSIGHTS
 export const getDashboardSummary = async (req, res) => {
-  const { provider = "gemini" } = req.body;
-
+  const provider = req.body?.provider ?? "gemini"; // safer
   try {
-    const invoices = await Invoice.find({ user: req.user.id }).sort({
+    const invoices = await Invoice.find({ user: req.user?.id }).sort({
       createdAt: -1,
     });
 
-    if (invoices.length === 0) {
+    if (!invoices || invoices.length === 0) {
       return res.status(200).json({
         success: true,
         message: "No invoice data available",
@@ -185,25 +179,31 @@ export const getDashboardSummary = async (req, res) => {
     }
 
     const totalInvoices = invoices.length;
-    const paidInvoices = invoices.filter((inv) => inv.status === "Paid");
-    const unpaidInvoices = invoices.filter((inv) => inv.status !== "Paid");
+    const paidInvoices = invoices.filter(
+      (inv) => inv?.status?.toLowerCase() === "paid"
+    );
+    const unpaidInvoices = invoices.filter(
+      (inv) => inv?.status?.toLowerCase() !== "paid"
+    );
 
-    const totalRevenue = paidInvoices.reduce((sum, inv) => sum + inv.total, 0);
+    const totalRevenue = paidInvoices.reduce(
+      (sum, inv) => sum + (inv?.total ?? 0),
+      0
+    );
     const totalOutstanding = unpaidInvoices.reduce(
-      (sum, inv) => sum + inv.total,
+      (sum, inv) => sum + (inv?.total ?? 0),
       0
     );
 
     const recentInvoices = invoices.slice(0, 5).map((inv) => ({
-      id: inv._id,
-      invoiceNumber: inv.invoiceNumber,
-      total: inv.total,
-      status: inv.status,
-      date: inv.createdAt,
+      id: inv?._id,
+      invoiceNumber: inv?.invoiceNumber,
+      total: inv?.total,
+      status: inv?.status,
+      date: inv?.createdAt,
     }));
 
-    const summaryText = `
-Dashboard Summary:
+    const summaryText = `Dashboard Summary:
 - Total invoices: ${totalInvoices}
 - Paid invoices: ${paidInvoices.length}
 - Unpaid invoices: ${unpaidInvoices.length}
@@ -230,18 +230,19 @@ Rules:
 `;
 
     const aiResponse =
-      provider === "openai"
+      provider?.toLowerCase() === "openai"
         ? await generateWithOpenAI(prompt)
         : await generateWithGemini(prompt);
 
-    const cleaned = aiResponse
-      .replace(/```json/gi, "")
-      .replace(/```/g, "")
-      .trim();
+    const cleaned =
+      aiResponse
+        ?.replace(/```json/gi, "")
+        ?.replace(/```/g, "")
+        ?.trim() ?? "";
 
     let parsedInsights;
     try {
-      parsedInsights = JSON.parse(cleaned).insights;
+      parsedInsights = JSON.parse(cleaned)?.insights;
       if (!Array.isArray(parsedInsights))
         throw new Error("Invalid insights format");
     } catch {
@@ -268,7 +269,7 @@ Rules:
     return res.status(500).json({
       success: false,
       message: "Internal Server Error",
-      error: error.message,
+      error: error?.message,
     });
   }
 };

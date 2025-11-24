@@ -16,8 +16,8 @@ import InvoiceDetail from "./Pages/Invoices/InvoiceDetail";
 import ProfilePage from "./Pages/Profile/ProfilePage";
 
 import ProtectedRoute from "./components/Auth/Procted.Route";
-import { AuthProvider } from "./context/AuthContext";
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { AuthProvider } from "./hooks/Authprovder";
 
 const queryClient = new QueryClient();
 

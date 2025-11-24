@@ -14,16 +14,23 @@ export const createInvoice = async (req, res) => {
       paymentTerms,
     } = req.body;
 
-    // subTotal Calculation
+    console.log("Invoice payload received:", req.body);
+
+    // subTotal & taxTotal calculation
     let subtotal = 0;
-    let taxtotal = 0;
+    let taxTotal = 0;
 
     items.forEach((item) => {
-      subtotal += item?.unitPrice * item?.Quantity;
-      taxtotal += (subtotal * (item?.taxPercent || 0)) / 100;
+      const qty = Number(item.quantity) || 0;
+      const price = Number(item.unitPrice) || 0;
+      const tax = Number(item.taxPercent) || 0;
+
+      const itemTotal = qty * price;
+      subtotal += itemTotal;
+      taxTotal += itemTotal * (tax / 100);
     });
 
-    const total = subtotal + taxtotal;
+    const total = subtotal + taxTotal;
 
     // create Invoice
     const invoice = new Invoice({
@@ -37,16 +44,15 @@ export const createInvoice = async (req, res) => {
       notes,
       paymentTerms,
       subtotal,
-      taxtotal,
+      taxTotal,
       total,
     });
 
     await invoice.save();
     res.status(201).json(invoice);
-
-    //
   } catch (error) {
-    console.error("Error Creating Invoice", error);
+    console.error("Error Creating Invoice:", error);
+    res.status(500).json({ message: "Failed to create invoice", error });
   }
 };
 
@@ -66,6 +72,10 @@ export const getInvoiceById = async (req, res) => {
   try {
     const invoice = await Invoice.findById(id).populate("user", "name email");
     if (!invoice) return res.status(404).json({ message: "Invoice not found" });
+
+    if (invoice.user.toString() !== req.user.id)
+      return res.status(401).json({ message: "Not Authurized" });
+
     res.status(200).json(invoice);
 
     //

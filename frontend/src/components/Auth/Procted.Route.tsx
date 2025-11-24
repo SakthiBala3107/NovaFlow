@@ -1,6 +1,7 @@
 import type { ReactNode } from "react"
 import { Navigate, Outlet } from "react-router-dom"
 import DashboardLayout from "../layout/DashboardLayout"
+import { useAuth } from "../../context/AuthContext"
 
 
 type ChildrenProps = {
@@ -13,10 +14,13 @@ type ChildrenProps = {
 
 
 
+
 const ProtectedRoute = ({ children }: ChildrenProps) => {
 
-    const isAuthenticated = true
-    const isLoading = false
+
+    // const { isAuthenticated } = useAuthStore()
+    const { isAuthenticated, isLoading } = useAuth()
+    // const isAuthenticated = true
 
 
     // Guard clause

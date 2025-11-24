@@ -4,14 +4,10 @@ import { FileText, Menu, X } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
 import ProfileDropdown from "../layout/ProfileDropdown";
 import Button from "../ui/Button";
-import { useAuthStore } from "../../store/authStore";
+import { useAuth } from "../../context/AuthContext";
 
 
-interface User {
-    name: string;
-    email: string;
-    avatar?: string;
-}
+
 
 
 const Header = () => {
@@ -19,9 +15,12 @@ const Header = () => {
     const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
     const [profileDropdownOpen, setProfileDropdownOpen] = useState<boolean>(false);
 
-    const { isAuthenticated } = useAuthStore()
-    const user: User = { name: "Azula", email: "princessAzula@gmail.com", avatar: '' };
-    const logout = () => { };
+    const { isAuthenticated } = useAuth()
+    console.log(isAuthenticated)
+
+    const { user, logout } = useAuth()
+    // const user: User = { name: "Azula", email: "princessAzula@gmail.com", avatar: '' };
+    // const logout = () => { };
 
     const navigate = useNavigate()
     // Handle scroll
@@ -34,7 +33,10 @@ const Header = () => {
         return () => window.removeEventListener("scroll", handleScroll);
     }, []);
 
-
+    const goToDashboard = () => {
+        navigate("/dashboard");
+    };
+    //returnreturn
     return (
         <header
             className={clsx(
@@ -46,7 +48,17 @@ const Header = () => {
                 <div className="flex items-center justify-between h-16 lg:h-20">
 
                     {/* Logo */}
-                    <div className="flex items-center space-x-2">
+                    <div
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            console.log("Logo clicked, auth =", isAuthenticated);
+                            if (isAuthenticated) navigate("/dashboard");
+                        }}
+                        className="flex items-center space-x-2 cursor-pointer"
+                    >
+
+
                         <div className="w-8 h-8 bg-blue-900 rounded-md flex items-center justify-center">
                             <FileText className="w-4 h-4 text-white" />
                         </div>
@@ -79,7 +91,7 @@ const Header = () => {
 
                     {/* Desktop Auth Buttons */}
                     <div className="hidden lg:flex items-center space-x-4">
-                        {isAuthenticated ? (
+                        {isAuthenticated && (
                             <ProfileDropdown
                                 isOpen={profileDropdownOpen}
                                 onToggle={(e) => {
@@ -91,7 +103,11 @@ const Header = () => {
                                 email={user?.email || ""}
                                 onLogout={logout}
                             />
-                        ) : (
+                        )
+
+                        }
+
+                        {!isAuthenticated && (
                             <>
                                 <Link to="/login" className="text-black hover:text-gray-900 font-medium transition-colors duration-200">
                                     Login
@@ -157,7 +173,7 @@ const Header = () => {
                             <div className="pt-2">
                                 <Button
                                     className="w-full bg-blue-900 text-white py-3 rounded-lg font-semibold transition-all duration-200 hover:bg-blue-950 hover:shadow-md"
-                                    onClick={() => navigate('/dashboard')}
+                                    onClick={goToDashboard}
                                 >
                                     Go to Dashboard
                                 </Button>
