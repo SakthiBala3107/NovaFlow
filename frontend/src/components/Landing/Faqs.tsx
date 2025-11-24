@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { FAQS } from "../../utils/data"
 import { ChevronDown } from "lucide-react"
-import type { FAQ } from "../../types/date.types"
+import type { FAQ } from "../../types/data.types"
 import clsx from "clsx"
 
 

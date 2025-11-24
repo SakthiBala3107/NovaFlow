@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { X } from "lucide-react";
-import type { DeleteConfirmModalProps } from "../../types/date.types";
+import type { DeleteConfirmModalProps } from "../../types/data.types";
 
 
 

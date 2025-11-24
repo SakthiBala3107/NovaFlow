@@ -24,14 +24,28 @@ async function parseWithGemini(prompt) {
   return text;
 }
 
+// Add this at the top of your controller file
+async function parseWithOpenAI(prompt) {
+  const response = await openai.chat.completions.create({
+    model: "gpt-4.1-mini",
+    messages: [{ role: "user", content: prompt }],
+  });
+
+  const text = response?.choices?.[0]?.message?.content;
+  if (!text) throw new Error("OpenAI failed to return text");
+
+  return text;
+}
+
 // PARSE INVOICE FROM RAW TEXT
 export const parseInvoiceFromText = async (req, res) => {
   const { text, provider = "gemini" } = req.body;
+  console.log(provider, " <---------------provider selected");
+  console.log("Request body:", req.body);
 
   if (!text) return res.status(400).json({ message: "Text is required" });
 
-  try {
-    const prompt = `
+  const prompt = `
 You are an expert invoice data extraction AI. Analyze the following text and extract invoice details.
 
 Return ONLY this JSON:
@@ -49,10 +63,19 @@ ${text}
 --- TEXT END ---
 `;
 
-    let rawResponse =
-      provider === "openai"
-        ? await parseWithOpenAI(prompt)
-        : await parseWithGemini(prompt);
+  try {
+    let rawResponse;
+
+    if (provider === "openai") {
+      try {
+        rawResponse = await parseWithOpenAI(prompt);
+      } catch (err) {
+        console.error("OpenAI failed, falling back to Gemini:", err.message);
+        rawResponse = await parseWithGemini(prompt); // fallback
+      }
+    } else {
+      rawResponse = await parseWithGemini(prompt);
+    }
 
     const cleanedJson = rawResponse
       .replace(/```json/gi, "")
@@ -63,7 +86,7 @@ ${text}
 
     return res.status(200).json({
       success: true,
-      provider,
+      provider, // still shows what user requested
       message: "Invoice parsed successfully",
       data: parsedData,
     });

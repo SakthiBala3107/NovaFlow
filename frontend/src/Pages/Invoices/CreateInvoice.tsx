@@ -11,7 +11,7 @@ import InputField from "../../components/ui/InputField";
 import TextAreaField from "../../components/ui/TextAreaField";
 import { Plus, Trash2 } from "lucide-react";
 import SelectedField from "../../components/ui/SelectedField";
-import type { InvoiceItem, InvoicePayload, InvoiceType } from "../../types/date.types";
+import type { InvoiceItem, InvoicePayload, InvoiceType } from "../../types/data.types";
 import { useCreateInvoice } from "../../hooks/UseQueries";
 import toast from "react-hot-toast";
 

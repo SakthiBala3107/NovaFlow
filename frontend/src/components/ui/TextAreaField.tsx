@@ -1,4 +1,4 @@
-import type { TextFieldAreaProps } from "../../types/date.types"
+import type { TextFieldAreaProps } from "../../types/data.types"
 import clsx from "clsx"
 
 const TextAreaField = ({ icon: Icon, label, name, ...props }: TextFieldAreaProps) => {
