@@ -1,5 +1,5 @@
 import clsx from "clsx"
-import type { InputFieldProps } from "../../types/date.types"
+import type { InputFieldProps } from "../../types/data.types"
 
 
 

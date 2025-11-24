@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axiosInstance from '../utils/axiosInstance';
 import { API_PATHS } from '../utils/apiPath';
 import toast from 'react-hot-toast';
-import type { LoginResponse, ApiError, LoginData, SignupResponse, SignupData, GetAllInvoicesResponse, DashboardSummary, InvoicePayload, InvoiceType } from '../types/date.types';
+import type { LoginResponse, ApiError, LoginData, SignupResponse, SignupData, GetAllInvoicesResponse, DashboardSummary, InvoicePayload, InvoiceType, DashboardInvoice, UpdateInvoiceArgs, ParseInvoiceRequest, ParseInvoiceResponse } from '../types/data.types';
 import { useAuth } from '../context/AuthContext';
 
 
@@ -193,18 +193,18 @@ export const useDeleteInvoice = () => {
 
 // update a invoice
 
+
 export const useUpdateInvoice = () => {
     const queryClient = useQueryClient();
 
-    return useMutation({
-        mutationFn: async ({ id, data }) => {
-            const res = await axiosInstance.put(
+    return useMutation<DashboardInvoice, unknown, UpdateInvoiceArgs>({
+        mutationFn: async ({ id, data }: UpdateInvoiceArgs) => {
+            const res = await axiosInstance.put<DashboardInvoice>(
                 API_PATHS.INVOICE.UPDATE_INVOICE(id),
                 data
             );
             return res.data;
         },
-
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["invoices-all"] });
             queryClient.invalidateQueries({ queryKey: ["invoices-list"] });
@@ -212,4 +212,27 @@ export const useUpdateInvoice = () => {
     });
 };
 
+
+// ai queries
+
+
+
+
+
+export const useParseInvoiceText = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation<ParseInvoiceResponse, unknown, ParseInvoiceRequest>({
+        mutationFn: async ({ text, provider }) => {
+            const response = await axiosInstance.post(API_PATHS.AI.PARSE_INVOICE_TEXT, { text, provider });
+            return response.data;
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['invoices-all'] });
+        },
+        // onError: (error: ApiError) => {
+        //   toast.error(error?.message || 'Failed to generate invoice.');
+        // },
+    });
+};
 

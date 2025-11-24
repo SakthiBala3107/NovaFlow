@@ -12,7 +12,7 @@ import ReminderModal from "../../components/modals/ReminderModal"
 import clsx from "clsx"
 import DeleteConfirmModal from "../../components/modals/DeleteModal"
 import toast from "react-hot-toast"
-import type { DashboardInvoice, InvoiceStatusPayload } from "../../types/date.types"
+import type { DashboardInvoice, InvoiceStatusPayload, InvoiceType } from "../../types/data.types"
 
 
 const Allinvoices = () => {
@@ -99,7 +99,7 @@ const Allinvoices = () => {
     // };
 
 
-    const handleStatusChange = (invoice: DashboardInvoice) => {
+    const handleStatusChange = (invoice: InvoiceType) => {
         if (!invoice?._id) return;
 
         setStatusChangeLoading(invoice._id);
@@ -147,19 +147,21 @@ const Allinvoices = () => {
             invoices
                 ?.filter(
                     (invoice) =>
-                        statusFilter === "All" || invoice?.status === statusFilter
+                        statusFilter === "All" || invoice.status === statusFilter
                 )
-                ?.filter(
-                    (invoice) =>
-                        invoice?.invoiceNumber
-                            ?.toLowerCase()
-                            ?.includes(searchTerm?.toLowerCase()) ||
-                        invoice?.billTo?.clientName
-                            ?.toLowerCase()
-                            ?.includes(searchTerm?.toLowerCase())
-                ) || []
+                ?.filter((invoice) => {
+                    const invoiceNumber = invoice.invoiceNumber ?? "";
+                    const clientName = invoice.billTo?.clientName ?? "";
+                    const search = searchTerm?.toLowerCase() ?? "";
+
+                    return (
+                        invoiceNumber.toLowerCase().includes(search) ||
+                        clientName.toLowerCase().includes(search)
+                    );
+                }) || []
         );
     }, [invoices, searchTerm, statusFilter]);
+
 
     // global loading
     const loading = deleteLoading || isLoading
@@ -277,9 +279,9 @@ const Allinvoices = () => {
                         )}
                     </div>
                 ) : (
-                    <div className="w-[90vw]  md:w-full overflow-x-auto">
+                    <div className="w-[90vw] md:w-full max-h-[60vh] overflow-y-auto shadow-inner [&::-webkit-scrollbar]:hidden [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-transparent">
                         <table className="min-w-full divide-y divide-slate-200">
-                            <thead className="bg-slate-50">
+                            <thead className="bg-slate-50 sticky top-0 z-10">
                                 <tr>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Invoice #</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Client</th>
@@ -289,37 +291,25 @@ const Allinvoices = () => {
                                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
-                            {/*  */}
+
                             <tbody className="bg-white divide-y divide-slate-200">
                                 {filteredInvoices?.map((invoice) => (
                                     <tr className="hover:bg-slate-50" key={invoice?._id}>
-                                        <td
-                                            className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 cursor-pointer"
-                                            onClick={() => navigate(`/invoices/${invoice?._id}`)}>{invoice?.invoiceNumber}
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 cursor-pointer" onClick={() => navigate(`/invoices/${invoice?._id}`)}>
+                                            {invoice?.invoiceNumber}
                                         </td>
-                                        <td
-                                            // className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 cursor-pointer"
-                                            onClick={() => navigate(`/invoices/${invoice?._id}`)}>{invoice?.billTo?.clientName}
-                                        </td>
-                                        <td
-                                            // className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 cursor-pointer"
-                                            onClick={() => navigate(`/invoices/${invoice?._id}`)}>{invoice?.total?.toFixed(2) || 0.00}
-                                        </td>
-                                        <td
-                                            // className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 cursor-pointer"
-                                            onClick={() => navigate(`/invoices/${invoice?._id}`)}>{invoice?.dueDate ? moment(invoice?.dueDate).format("MMM DD, YYYY") : "N/A"}
-                                        </td>
+                                        <td onClick={() => navigate(`/invoices/${invoice?._id}`)}>{invoice?.billTo?.clientName}</td>
+                                        <td onClick={() => navigate(`/invoices/${invoice?._id}`)}>{invoice?.total?.toFixed(2) || 0.00}</td>
+                                        <td onClick={() => navigate(`/invoices/${invoice?._id}`)}>{invoice?.dueDate ? moment(invoice?.dueDate).format("MMM DD, YYYY") : "N/A"}</td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                            <span
-                                                className={clsx(
-                                                    "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
-                                                    invoice?.status === "Paid"
-                                                        ? "bg-emerald-100 text-emerald-800"
-                                                        : invoice?.status === "Pending"
-                                                            ? "bg-amber-100 text-amber-800"
-                                                            : "bg-red-100 text-red-800"
-                                                )}
-                                            >
+                                            <span className={clsx(
+                                                "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                                                invoice?.status === "Paid"
+                                                    ? "bg-emerald-100 text-emerald-800"
+                                                    : invoice?.status === "Pending"
+                                                        ? "bg-amber-100 text-amber-800"
+                                                        : "bg-red-100 text-red-800"
+                                            )}>
                                                 {invoice?.status}
                                             </span>
                                         </td>
@@ -338,7 +328,6 @@ const Allinvoices = () => {
                                                     )}
                                                 </Button>
 
-                                                ''
                                                 <Button size="small" variant="ghost" onClick={() => navigate(`/invoices/${invoice?._id}`)}><Edit className="w-4 h-4" /></Button>
                                                 <Button
                                                     size="small"
@@ -349,20 +338,18 @@ const Allinvoices = () => {
                                                 </Button>
                                                 {invoice?.status !== 'Paid' && (
                                                     <Button size="small" variant="ghost" onClick={() => handleOpenReminderModal(invoice?._id)} title="Generate Reminder"><Mail className="text-blue-500 w-4 h-4" /></Button>
-
                                                 )}
-
                                             </div>
                                         </td>
-
-                                        {/*  */}
                                     </tr>
                                 ))}
                             </tbody>
-
-                            {/*  */}
                         </table>
                     </div>
+
+
+
+
                 )
 
                 }

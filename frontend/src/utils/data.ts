@@ -6,13 +6,15 @@ import {
   Plus,
   LayoutDashboard,
   Users,
+  Cpu,
 } from "lucide-react";
 import type {
   FAQ,
   Feature,
   NavigationItem,
+  ProvidersProps,
   Testimonial,
-} from "../types/date.types";
+} from "../types/data.types";
 
 export const FEATURES: Feature[] = [
   {
@@ -103,4 +105,9 @@ export const NAVIGATION_MENU: NavigationItem[] = [
   { id: "invoices", name: "Invoices", icon: FileText },
   { id: "invoices/new", name: "CreateInvoice", icon: Plus },
   { id: "profile", name: "Profile", icon: Users },
+];
+
+export const providers: ProvidersProps[] = [
+  { value: "gemini", label: "Gemini", icon: Sparkles },
+  { value: "openai", label: "OpenAI", icon: Cpu },
 ];

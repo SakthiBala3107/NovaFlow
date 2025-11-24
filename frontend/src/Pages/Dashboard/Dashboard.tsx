@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { DollarSign, FileText, Plus } from "lucide-react";
-import type { ColorMap, StatsItem } from "../../types/date.types";
+import type { ColorMap, DashboardInvoice, StatsItem } from "../../types/data.types";
 import { useGetAllInvoices } from "../../hooks/UseQueries";
 import toast from "react-hot-toast";
 import moment from 'moment';
@@ -13,7 +13,7 @@ const Dashboard = () => {
     const navigate = useNavigate();
     const { data: invoiceData, isLoading: isFetching, error } = useGetAllInvoices();
 
-    const Invoices = invoiceData ?? [];
+    const Invoices: DashboardInvoice[] = invoiceData?.invoices ?? invoiceData ?? [];
 
     // Derived stats
     const totalInvoices = Invoices?.length;

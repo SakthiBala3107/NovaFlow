@@ -4,7 +4,7 @@ import type { InputHTMLAttributes, ReactNode } from "react";
 /* ------------------- NAVIGATION / UI STUFF ------------------- */
 
 export interface NavigationItem {
-  id: number;
+  id: string;
   name: string;
   icon: LucideIcon;
 }
@@ -32,6 +32,12 @@ export type Testimonial = {
 export type FAQ = {
   question: string;
   answer: string;
+};
+
+export type ProvidersProps = {
+  value: string;
+  label: string;
+  icon: LucideIcon;
 };
 
 /* ------------------- GENERAL USER TYPES ------------------- */
@@ -138,6 +144,9 @@ export interface DashboardInvoice {
   status: "paid" | "unpaid" | "pending";
   createdAt: string;
   invoiceDate?: string;
+  invoiceNumber?: number;
+  billTo?: BillInfo;
+  dueDate?: string;
 }
 
 export interface GetAllInvoicesResponse {
@@ -285,3 +294,19 @@ export interface DeleteConfirmModalProps {
 export interface InvoiceStatusPayload {
   status: "Paid" | "Unpaid" | "Overdue" | "Pending";
 }
+
+export interface UpdateInvoiceArgs {
+  id: string;
+  data: InvoiceStatusPayload;
+}
+
+export type ParseInvoiceResponse = {
+  invoiceId: string;
+  message: string;
+  data?: InvoicePayload;
+};
+
+export type ParseInvoiceRequest = {
+  text: string;
+  provider?: "gemini" | "openai" | string;
+};

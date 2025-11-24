@@ -1,5 +1,5 @@
 
-import type { SelectedFieldProps } from "../../types/date.types";
+import type { SelectedFieldProps } from "../../types/data.types";
 
 const SelectedField = ({ label, name, options, ...props }: SelectedFieldProps) => {
     return (

@@ -4,7 +4,7 @@ import { Eye, EyeOff, Mail, Lock, FileText, User } from 'lucide-react';
 import clsx from 'clsx';
 
 import { useSignup } from '../../hooks/UseQueries';
-import { type MyFormData, type FieldErrors, type TouchedFields, } from '../../types/date.types';
+import { type MyFormData, type FieldErrors, type TouchedFields, } from '../../types/data.types';
 import toast from 'react-hot-toast';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
