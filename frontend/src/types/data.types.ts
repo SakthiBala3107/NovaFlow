@@ -74,6 +74,7 @@ export interface ApiError {
   response?: string;
   data?: string;
   status?: number;
+  code?: number;
 }
 
 export interface LoginData {
@@ -211,7 +212,8 @@ export type TextFieldAreaProps = {
 /* ------------------- API INVOICE SCHEMA (REAL BACKEND) ------------------- */
 
 export interface InvoiceItem {
-  _id: string;
+  _id?: string;
+  name: string;
   quantity: number;
   unitPrice: number;
   taxPercent: number;
@@ -278,11 +280,26 @@ export interface InvoicePayload {
   paymentTerms?: string;
 }
 
+export type CreateInvoiceProps = {
+  existingInvoice?: InvoiceType | null;
+  onSave?: (data: InvoiceType) => void;
+};
+
 /* ------------------- MODAL PROPS ------------------- */
 export interface AIModalProps {
   isOpen: boolean;
   onclose: () => void;
   invoiceId?: string | number | undefined;
+}
+
+export interface GenerateReminderParams {
+  invoiceId?: number | string;
+  isLoading?: boolean;
+}
+
+export interface GenerateReminderResponse {
+  reminderText?: string | number;
+  isLoading?: boolean;
 }
 
 export interface DeleteConfirmModalProps {

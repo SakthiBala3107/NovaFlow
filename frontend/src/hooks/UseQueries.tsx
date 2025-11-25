@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axiosInstance from '../utils/axiosInstance';
 import { API_PATHS } from '../utils/apiPath';
 import toast from 'react-hot-toast';
-import type { LoginResponse, ApiError, LoginData, SignupResponse, SignupData, GetAllInvoicesResponse, DashboardSummary, InvoicePayload, InvoiceType, DashboardInvoice, UpdateInvoiceArgs, ParseInvoiceRequest, ParseInvoiceResponse } from '../types/data.types';
+import type { LoginResponse, ApiError, LoginData, SignupResponse, SignupData, GetAllInvoicesResponse, DashboardSummary, InvoicePayload, InvoiceType, DashboardInvoice, UpdateInvoiceArgs, ParseInvoiceRequest, ParseInvoiceResponse, GenerateReminderParams, GenerateReminderResponse } from '../types/data.types';
 import { useAuth } from '../context/AuthContext';
 
 
@@ -236,3 +236,78 @@ export const useParseInvoiceText = () => {
     });
 };
 
+
+//remidermodal post ->REMINDER TEXT 
+// hooks/useGenerateReminder.ts
+
+
+
+
+export const useGenerateReminder = () => {
+    return useMutation<GenerateReminderResponse, unknown, GenerateReminderParams>({
+        mutationFn: async ({ invoiceId }) => {
+            const response = await axiosInstance.post(API_PATHS.AI.GENERATE_REMINDER, { invoiceId });
+            return { reminderText: response.data.email };
+        },
+        onError: (error: unknown) => {
+            const apiError = error as ApiError;
+            toast.error("Failed to generate reminder. Please try again.");
+            console.error("Error generating reminder:", apiError);
+        },
+        onSuccess: () => {
+            toast.success("Reminder generated successfully!");
+        },
+    });
+};
+
+
+
+
+
+
+export const useInvoiceById = (id: string | undefined) => {
+    return useQuery<InvoiceType>({
+        queryKey: ["invoice", id],
+        queryFn: async () => {
+            if (!id) throw new Error("Missing invoice id");
+
+            const res = await axiosInstance.get(
+                API_PATHS.INVOICE.GET_INVOICE_BY_ID(id)
+            );
+
+            return res.data as InvoiceType;
+        },
+
+        enabled: !!id,
+
+        retry: 1,
+
+
+    });
+};
+
+
+export const useEditInvoice = () => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: async ({ id, data }: { id: string; data: InvoicePayload }) => {
+            const response = await axiosInstance.put(
+                API_PATHS.INVOICE.GET_INVOICE_BY_ID(id),
+                data
+            );
+            return response.data as InvoiceType;
+        },
+
+        onSuccess: () => {
+            toast.success("Invoice updated successfully!");
+
+            queryClient.invalidateQueries({ queryKey: ["invoice"] });
+            queryClient.invalidateQueries({ queryKey: ["invoices-all"] });
+        },
+
+        onError: () => {
+            toast.error("Failed to update invoice!");
+        },
+    });
+};

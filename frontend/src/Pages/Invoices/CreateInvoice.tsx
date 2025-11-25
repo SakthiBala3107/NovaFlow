@@ -11,23 +11,19 @@ import InputField from "../../components/ui/InputField";
 import TextAreaField from "../../components/ui/TextAreaField";
 import { Plus, Trash2 } from "lucide-react";
 import SelectedField from "../../components/ui/SelectedField";
-import type { InvoiceItem, InvoicePayload, InvoiceType } from "../../types/data.types";
+import type { CreateInvoiceProps, InvoicePayload, InvoiceType } from "../../types/data.types";
 import { useCreateInvoice } from "../../hooks/UseQueries";
 import toast from "react-hot-toast";
 
-/**
- * Local/fallback types — adjust to match your project's `InvoicePayload` if needed.
- * These keep TypeScript happy and are compatible with your form data.
- */
 
 
-const CreateInvoice: React.FC = () => {
+const CreateInvoice: React.FC = ({ existingInvoice, onSave }: CreateInvoiceProps) => {
     const navigate = useNavigate();
     const location = useLocation();
     const { user } = useAuth();
-    const { mutate: createInvoice, isPending } = useCreateInvoice();
+    const { mutate: createInvoice } = useCreateInvoice();
 
-    const existingInvoice: any = ""; // left as you had it; replace with actual object when editing
+    ;
 
     const [formData, setFormData] = useState<InvoicePayload>(
         (existingInvoice as InvoicePayload) || {

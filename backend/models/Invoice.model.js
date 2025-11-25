@@ -1,9 +1,10 @@
 import mongoose from "mongoose";
 const itemSchema = new mongoose.Schema({
+  name: { type: String, required: true },
   quantity: { type: Number, required: true, default: 0 },
   unitPrice: { type: Number, required: true, default: 0 },
   taxPercent: { type: Number, default: 0 },
-  total: { type: Number, required: true, default: 0 }, // <-- default prevents NaN crash
+  total: { type: Number, required: true, default: 0 },
 });
 
 const invoiceSchema = new mongoose.Schema(
