@@ -11,13 +11,13 @@ import InputField from "../../components/ui/InputField";
 import TextAreaField from "../../components/ui/TextAreaField";
 import { Plus, Trash2 } from "lucide-react";
 import SelectedField from "../../components/ui/SelectedField";
-import type { CreateInvoiceProps, InvoicePayload, InvoiceType } from "../../types/data.types";
+import type { AIInvoiceItem, AIInvoiceData, CreateInvoiceProps, InvoicePayload, InvoiceType } from "../../types/data.types";
 import { useCreateInvoice } from "../../hooks/UseQueries";
 import toast from "react-hot-toast";
 
 
-
-const CreateInvoice: React.FC = ({ existingInvoice, onSave }: CreateInvoiceProps) => {
+// onSave
+const CreateInvoice: React.FC<CreateInvoiceProps> = ({ existingInvoice }) => {
     const navigate = useNavigate();
     const location = useLocation();
     const { user } = useAuth();
@@ -49,7 +49,7 @@ const CreateInvoice: React.FC = ({ existingInvoice, onSave }: CreateInvoiceProps
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
     useEffect(() => {
-        const aiData = (location.state as any)?.aiData;
+        const aiData = (location.state as AIInvoiceData)?.aiData;
 
         // 1) Apply AI data
         if (aiData) {
@@ -63,11 +63,11 @@ const CreateInvoice: React.FC = ({ existingInvoice, onSave }: CreateInvoiceProps
                         phone: "",
                     },
                     items:
-                        aiData.items?.map((it: any) => ({
-                            name: it.name || "",
-                            quantity: Number(it.quantity) || 1,
-                            unitPrice: Number(it.unitPrice) || 0,
-                            taxPercent: Number(it.taxPercent) || 0,
+                        aiData.items?.map((it: AIInvoiceItem) => ({
+                            name: it?.name || "",
+                            quantity: Number(it?.quantity) || 1,
+                            unitPrice: Number(it?.unitPrice) || 0,
+                            taxPercent: Number(it?.taxPercent) || 0,
                         })) || [{ name: "", quantity: 1, unitPrice: 0, taxPercent: 0 }],
                 }));
             });
@@ -97,7 +97,7 @@ const CreateInvoice: React.FC = ({ existingInvoice, onSave }: CreateInvoiceProps
                 const invoices = response?.data || [];
 
                 let maxNum = 0;
-                invoices.forEach((inv: any) => {
+                invoices.forEach((inv: InvoicePayload) => {
                     const parts = String(inv?.invoiceNumber || "").split("-");
                     const num = parseInt(parts[1]);
                     if (!isNaN(num) && num > maxNum) maxNum = num;
@@ -144,7 +144,7 @@ const CreateInvoice: React.FC = ({ existingInvoice, onSave }: CreateInvoiceProps
         if (section) {
             setFormData((prev) => ({
                 ...prev,
-                [section]: { ...(prev as any)[section], [name]: sanitizedValue },
+                [section]: { ...(prev as InvoicePayload)[section], [name]: sanitizedValue },
             }));
             return;
         }
@@ -167,7 +167,7 @@ const CreateInvoice: React.FC = ({ existingInvoice, onSave }: CreateInvoiceProps
             ...prev,
             items: [
                 ...(prev.items || []),
-                { name: "", quantity: 1, unitPrice: 0, taxPercent: 0 },
+                { name: "", quantity: 1, unitPrice: 0, taxPercent: 0, total: 0 },
             ],
         }));
     };
@@ -217,7 +217,7 @@ const CreateInvoice: React.FC = ({ existingInvoice, onSave }: CreateInvoiceProps
                     quantity,
                     unitPrice,
                     taxPercent,
-                    total: isNaN(total) ? 0 : total, // 💥 force safe
+                    total: isNaN(total) ? 0 : total,
                 };
             });
 
@@ -287,7 +287,7 @@ const CreateInvoice: React.FC = ({ existingInvoice, onSave }: CreateInvoiceProps
                         disabled
                     />
                     <InputField
-                        onChange={(e) => handleInputChange(e as any, null)}
+                        onChange={(e) => handleInputChange(e as React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>, null)}
                         label="InvoiceDate"
                         type="date"
                         name="invoiceDate"
@@ -295,11 +295,11 @@ const CreateInvoice: React.FC = ({ existingInvoice, onSave }: CreateInvoiceProps
                     />
 
                     <InputField
-                        onChange={(e) => handleInputChange(e as any, null)}
+                        onChange={(e) => handleInputChange(e as React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>, null)}
                         label="dueDate"
                         type="date"
                         name="dueDate"
-                        value={formData?.dueDate}
+                        value={formData?.dueDate ?? ""}
                     />
                 </div>
             </div>
@@ -311,25 +311,25 @@ const CreateInvoice: React.FC = ({ existingInvoice, onSave }: CreateInvoiceProps
                         label="Business Name"
                         name="businessName"
                         value={formData?.billFrom?.businessName}
-                        onChange={(e) => handleInputChange(e as any, "billFrom")}
+                        onChange={(e) => handleInputChange(e as React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>, "billFrom")}
                     />
                     <InputField
                         label="Email"
                         name="email"
                         value={formData?.billFrom?.email}
-                        onChange={(e) => handleInputChange(e as any, "billFrom")}
+                        onChange={(e) => handleInputChange(e as React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>, "billFrom")}
                     />
                     <TextAreaField
                         label="Address"
                         name="address"
                         value={formData?.billFrom?.address}
-                        onChange={(e) => handleInputChange(e as any, "billFrom")}
+                        onChange={(e) => handleInputChange(e as React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>, "billFrom")}
                     />
                     <InputField
                         label="Phone"
                         name="phone"
                         value={formData?.billFrom?.phone}
-                        onChange={(e) => handleInputChange(e as any, "billFrom")}
+                        onChange={(e) => handleInputChange(e as React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>, "billFrom")}
                     />
                 </div>
 
@@ -340,28 +340,28 @@ const CreateInvoice: React.FC = ({ existingInvoice, onSave }: CreateInvoiceProps
                         label="Client Name"
                         name="clientName"
                         value={formData?.billTo?.clientName}
-                        onChange={(e) => handleInputChange(e as any, "billTo")}
+                        onChange={(e) => handleInputChange(e as React.ChangeEvent<HTMLInputElement>, "billTo")}
                     />
 
                     <InputField
                         label="Client Email"
                         name="email" // <-- must match formData.billTo.email
                         value={formData?.billTo?.email}
-                        onChange={(e) => handleInputChange(e as any, "billTo")}
+                        onChange={(e) => handleInputChange(e as React.ChangeEvent<HTMLInputElement>, "billTo")}
                     />
 
                     <TextAreaField
                         label="Client Address"
                         name="address" // <-- must match formData.billTo.address
                         value={formData?.billTo?.address}
-                        onChange={(e) => handleInputChange(e as any, "billTo")}
+                        onChange={(e) => handleInputChange(e as React.ChangeEvent<HTMLTextAreaElement | HTMLInputElement>, "billTo")}
                     />
 
                     <InputField
                         label="Client Phone"
-                        name="phone" // <-- must match formData.billTo.phone
+                        name="phone"
                         value={formData?.billTo?.phone}
-                        onChange={(e) => handleInputChange(e as any, "billTo")}
+                        onChange={(e) => handleInputChange(e as React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>, "billTo")}
                     />
                 </div>
 
@@ -410,7 +410,7 @@ const CreateInvoice: React.FC = ({ existingInvoice, onSave }: CreateInvoiceProps
                                                 value={item?.name ?? ""}
                                                 placeholder="Items Name"
                                                 className="w-full h-10 px-3 py-2 border border-slate-200 rounded-lg bg-white text-slate-900 placeholder-slate 400 focus:outline-none foucs:ring-2 focus:ring-blue-500 focus:border-transparent "
-                                                onChange={(e) => handleInputChange(e as any, null, index)}
+                                                onChange={(e) => handleInputChange(e as React.ChangeEvent<HTMLInputElement>, null, index)}
                                             />
                                         </td>
                                         <td className="px-2 sm:px-6 py-4">
@@ -420,7 +420,7 @@ const CreateInvoice: React.FC = ({ existingInvoice, onSave }: CreateInvoiceProps
                                                 value={item?.quantity ?? 0}
                                                 placeholder="Items Quantity"
                                                 className="w-full h-10 px-3 py-2 border border-slate-200 rounded-lg bg-white text-slate-900 placeholder-slate 400 focus:outline-none foucs:ring-2 focus:ring-blue-500 focus:border-transparent "
-                                                onChange={(e) => handleInputChange(e as any, null, index)}
+                                                onChange={(e) => handleInputChange(e as React.ChangeEvent<HTMLInputElement>, null, index)}
                                             />
                                         </td>
                                         <td className="px-2 sm:px-6 py-4">
@@ -430,7 +430,7 @@ const CreateInvoice: React.FC = ({ existingInvoice, onSave }: CreateInvoiceProps
                                                 value={item?.unitPrice ?? 0}
                                                 placeholder="Price"
                                                 className="w-full h-10 px-3 py-2 border border-slate-200 rounded-lg bg-white text-slate-900 placeholder-slate 400 focus:outline-none foucs:ring-2 focus:ring-blue-500 focus:border-transparent "
-                                                onChange={(e) => handleInputChange(e as any, null, index)}
+                                                onChange={(e) => handleInputChange(e as React.ChangeEvent<HTMLInputElement>, null, index)}
                                             />
                                         </td>
                                         <td className="px-2 sm:px-6 py-4">
@@ -440,7 +440,7 @@ const CreateInvoice: React.FC = ({ existingInvoice, onSave }: CreateInvoiceProps
                                                 value={item?.taxPercent ?? 0}
                                                 placeholder="Tax (%)"
                                                 className="w-full h-10 px-3 py-2 border border-slate-200 rounded-lg bg-white text-slate-900 placeholder-slate 400 focus:outline-none foucs:ring-2 focus:ring-blue-500 focus:border-transparent "
-                                                onChange={(e) => handleInputChange(e as any, null, index)}
+                                                onChange={(e) => handleInputChange(e as React.ChangeEvent<HTMLInputElement>, null, index)}
                                             />
                                         </td>
                                         <td className="px-2 sm:px-6 py-4 text-slate-500">${formatNumber(itemTotal)}</td>
@@ -466,8 +466,8 @@ const CreateInvoice: React.FC = ({ existingInvoice, onSave }: CreateInvoiceProps
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 <div className="bg-white p-6 rounded-lg shadow-sm shadow-gray-100 border border-slate-200 space-y-4">
                     <h3 className="">Notes & Terms</h3>
-                    <TextAreaField label="Notes" name="notes" value={formData?.notes ?? ""} onChange={(e) => handleInputChange(e as any, null)} />
-                    <SelectedField label="Payment Terms" value={formData?.paymentTerms ?? ""} onChange={(e) => handleInputChange(e as any, null)} options={["Net 15", "Net 30", "Net 60", "Due on receipt"]} />
+                    <TextAreaField label="Notes" name="notes" value={formData?.notes ?? ""} onChange={(e) => handleInputChange(e as React.ChangeEvent<HTMLTextAreaElement>, null)} />
+                    <SelectedField label="Payment Terms" name="terms" value={formData?.paymentTerms ?? ""} onChange={(e) => handleInputChange(e as React.ChangeEvent<HTMLSelectElement>, null)} options={["Net 15", "Net 30", "Net 60", "Due on receipt"]} />
                 </div>
 
                 <div className="bg-white p-6 rounded-lg shadow-sm shadow-gray-100 border border-slate-200 flex flex-col justify-center">

@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axiosInstance from '../utils/axiosInstance';
 import { API_PATHS } from '../utils/apiPath';
 import toast from 'react-hot-toast';
-import type { LoginResponse, ApiError, LoginData, SignupResponse, SignupData, GetAllInvoicesResponse, DashboardSummary, InvoicePayload, InvoiceType, DashboardInvoice, UpdateInvoiceArgs, ParseInvoiceRequest, ParseInvoiceResponse, GenerateReminderParams, GenerateReminderResponse } from '../types/data.types';
+import type { LoginResponse, ApiError, LoginData, SignupResponse, SignupData, GetAllInvoicesResponse, DashboardSummary, InvoicePayload, InvoiceType, DashboardInvoice, UpdateInvoiceArgs, ParseInvoiceRequest, ParseInvoiceResponse, GenerateReminderParams, GenerateReminderResponse, FormState } from '../types/data.types';
 import { useAuth } from '../context/AuthContext';
 
 
@@ -308,6 +308,17 @@ export const useEditInvoice = () => {
 
         onError: () => {
             toast.error("Failed to update invoice!");
+        },
+    });
+};
+
+
+
+export const useUpdateProfile = () => {
+    return useMutation({
+        mutationFn: async (data: FormState) => {
+            const res = await axiosInstance.put(API_PATHS.AUTH.UPDATE_PROFILE, data);
+            return res.data;
         },
     });
 };
