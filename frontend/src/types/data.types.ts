@@ -327,3 +327,25 @@ export type ParseInvoiceRequest = {
   text: string;
   provider?: "gemini" | "openai" | string;
 };
+
+export type AIInvoiceItem = {
+  name?: string;
+  quantity?: number | string;
+  unitPrice?: number | string;
+  taxPercent?: number | string;
+};
+export interface AIInvoiceData {
+  clientName: string;
+  email: string;
+  address: string;
+  items: AIInvoiceItem[];
+}
+
+// profile props
+
+export type FormState = {
+  name: string;
+  businessName: string;
+  address: string;
+  phone: string;
+};

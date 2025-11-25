@@ -1,8 +1,7 @@
-import { useEffect, useRef, useState } from "react"
+import { useRef, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
-import axiosInstance from "../../utils/axiosInstance"
-import { API_PATHS } from "../../utils/apiPath"
-import { AlertCircle, Edit, Loader2, Mail, Printer } from "lucide-react"
+
+import { AlertCircle, Edit, Mail, Printer } from "lucide-react"
 import toast from "react-hot-toast"
 import CreateInvoice from "./CreateInvoice"
 import Button from "../../components/ui/Button"
@@ -16,14 +15,14 @@ import clsx from "clsx"
 const InvoiceDetail = () => {
     const { id } = useParams()
     const navigate = useNavigate()
-    const [invoice, setInvoice] = useState<InvoicePayload | string | number | null>(null)
+    const [setInvoice] = useState<InvoicePayload | null>(null)
     const [isEditing, setIsEditing] = useState<boolean>(false)
     const [isReminderModalOpen, setIsReminderModalOpen] = useState<boolean>(false)
     const invoiceRef = useRef<HTMLDivElement>(null)
 
 
-    const { data: invoiceData, isLoading, isError, } = useInvoiceById(id);
-    const { mutate: editInvoice, isPending: isUpdating } = useEditInvoice();
+    const { data: invoiceData, isLoading, } = useInvoiceById(id);
+    const { mutate: editInvoice, } = useEditInvoice();
 
 
     const handleUpdate = (formData: InvoicePayload) => {
@@ -48,9 +47,37 @@ const InvoiceDetail = () => {
 
 
 
-    //
+    //loading skelton
+    if (isLoading) {
+        return (
+            <div className="animate-pulse space-y-6 bg-white p-6 rounded-lg shadow-md border border-slate-200">
+                <div className="h-6 w-40 bg-slate-200 rounded" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <div className="space-y-2">
+                        <div className="h-4 w-24 bg-slate-200 rounded" />
+                        <div className="h-4 w-32 bg-slate-200 rounded" />
+                        <div className="h-4 w-28 bg-slate-200 rounded" />
+                    </div>
+                    <div className="space-y-2">
+                        <div className="h-4 w-24 bg-slate-200 rounded" />
+                        <div className="h-4 w-32 bg-slate-200 rounded" />
+                        <div className="h-4 w-28 bg-slate-200 rounded" />
+                    </div>
+                </div>
 
-    if (!invoiceData) {
+                <div className="h-40 bg-slate-200 rounded" />
+                <div className="h-10 w-32 bg-slate-300 rounded" />
+            </div>
+        );
+    }
+
+
+
+
+
+
+    // no data found
+    if (!isLoading && !invoiceData) {
         return <div className="flex flex-col items-center justify-center py-12 text-center bg-slate-50 rounded-lg">
 
             <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-4 ">
