@@ -13,18 +13,30 @@ const Dashboard = () => {
     const navigate = useNavigate();
     const { data: invoiceData, isLoading: isFetching, error } = useGetAllInvoices();
 
-    const Invoices: DashboardInvoice[] = Array.isArray(invoiceData?.invoices)
+    // Normalize input
+    const invoices: DashboardInvoice[] = Array.isArray(invoiceData?.invoices)
         ? invoiceData.invoices
         : Array.isArray(invoiceData)
             ? invoiceData
             : [];
 
-    // Derived stats
-    const totalInvoices = Invoices?.length;
-    const totalPaid = Invoices?.filter(inv => inv?.status?.toLowerCase() === "paid")
-        .reduce((acc, inv) => acc + (inv?.total ?? 0), 0);
-    const totalUnpaid = Invoices.filter(inv => inv?.status?.toLowerCase() !== "paid")
-        .reduce((acc, inv) => acc + (inv?.total ?? 0), 0);
+    // Derived stats in one pass
+    let totalPaid = 0;
+    let totalUnpaid = 0;
+
+    for (const inv of invoices) {
+        const status = inv?.status?.toLowerCase() ?? "";
+        const amount = inv?.total ?? 0;
+
+        if (status === "paid") {
+            totalPaid += amount;
+        } else {
+            totalUnpaid += amount;
+        }
+    }
+
+    const totalInvoices = invoices?.length;
+
 
     const stats: StatsItem[] = [
         { icon: FileText, label: "Total Invoices", value: totalInvoices, color: "blue" },
@@ -40,10 +52,15 @@ const Dashboard = () => {
 
     // Recent invoices
     const recentInvoices = useMemo(() => {
-        return [...Invoices]
-            .sort((a, b) => new Date(b?.invoiceDate ?? 0).getTime() - new Date(a?.invoiceDate ?? 0).getTime())
+        return [...invoices]
+            .sort(
+                (a, b) =>
+                    new Date(b?.invoiceDate ?? 0).getTime() -
+                    new Date(a?.invoiceDate ?? 0).getTime()
+            )
             .slice(0, 5);
-    }, [Invoices]);
+    }, [invoices]);
+
 
     // 🔵 Skeleton loading
     if (isFetching) {
