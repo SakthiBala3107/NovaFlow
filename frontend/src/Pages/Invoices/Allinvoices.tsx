@@ -1,6 +1,5 @@
-import { useEffect, useMemo, useState } from "react"
-import axiosInstance from "../../utils/axiosInstance"
-import { API_PATHS } from "../../utils/apiPath"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+
 import { AlertCircle, Edit, FileText, Loader2, Mail, Plus, Search, Sparkles, Trash2 } from "lucide-react"
 
 import moment from "moment"
@@ -12,13 +11,64 @@ import ReminderModal from "../../components/modals/ReminderModal"
 import clsx from "clsx"
 import DeleteConfirmModal from "../../components/modals/DeleteModal"
 import toast from "react-hot-toast"
-import type { DashboardInvoice, InvoiceStatusPayload, InvoiceType } from "../../types/data.types"
+import type { InvoiceStatusPayload, InvoiceType } from "../../types/data.types"
 
 
 const Allinvoices = () => {
-    const { data: invoices, isLoading, isError } = useGetInvoices();
+    // const { data: invoices, isLoading, isError } = useGetInvoices();
     const { mutate: deleteInvoice, isPending: deleteLoading } = useDeleteInvoice();
-    const { mutate: updateInvoice, isPending: updateLoading } = useUpdateInvoice();
+    const { mutate: updateInvoice, } = useUpdateInvoice();
+
+    // pagination
+    // Fetch invoices paginated
+    const {
+        data: invoicePages,
+        fetchNextPage,
+        hasNextPage,
+        isFetchingNextPage,
+        isError
+        , isLoading: invoicesLoading,
+    } = useGetInvoices();
+
+    // Refs
+    const invoicesContainerRef = useRef<HTMLDivElement | null>(null);
+    const observerRef = useRef<IntersectionObserver | null>(null);
+
+    // Sentinel ref using callback (recommended)
+    const invoicesSentinelRef = useCallback(
+        (node: HTMLDivElement | null) => {
+            if (!node) return;
+
+            // Disconnect old observer
+            if (observerRef.current) observerRef.current.disconnect();
+
+            // Create new observer
+            observerRef.current = new IntersectionObserver(
+                (entries) => {
+                    const [entry] = entries;
+                    if (entry.isIntersecting && hasNextPage && !isFetchingNextPage) {
+                        console.log("📡 Fetching next invoice page...");
+                        fetchNextPage();
+                    }
+                },
+                {
+                    root: invoicesContainerRef.current,
+                    rootMargin: "0px 0px 200px 0px",
+                    threshold: 0.1,
+                }
+            );
+
+            observerRef.current.observe(node);
+            console.log("👀 Invoice observer attached");
+        },
+        [hasNextPage, isFetchingNextPage, fetchNextPage]
+    );
+
+    // Flatten invoice list
+    const invoicesList = useMemo(() => {
+        return invoicePages?.pages.flatMap((page) => page.results ?? []) ?? [];
+    }, [invoicePages]);
+
 
 
 
@@ -73,30 +123,6 @@ const Allinvoices = () => {
 
 
 
-    // update a invoice
-    // const handleStatusChange = (
-    //     invoiceId: string | number | undefined,
-    //     payload: InvoiceStatusPayload
-    // ) => {
-    //     if (!invoiceId) return;
-
-    //     setStatusChangeLoading(invoiceId);
-
-    //     updateInvoice(
-    //         {
-    //             id: String(invoiceId),
-    //             data: payload,
-    //         },
-    //         {
-    //             onSuccess: () => {
-    //                 setStatusChangeLoading(null);
-    //             },
-    //             onError: () => {
-    //                 setStatusChangeLoading(null);
-    //             },
-    //         }
-    //     );
-    // };
 
 
     const handleStatusChange = (invoice: InvoiceType) => {
@@ -125,10 +151,10 @@ const Allinvoices = () => {
                         )
                     );
 
-                    setStatusChangeLoading(null);
+                    setStatusChangeLoading('');
                 },
                 onError: () => {
-                    setStatusChangeLoading(null);
+                    setStatusChangeLoading('');
                 },
             }
         );
@@ -142,29 +168,28 @@ const Allinvoices = () => {
 
 
 
-    const filteredInvoices = useMemo(() => {
-        return (
-            invoices
-                ?.filter(
-                    (invoice) =>
-                        statusFilter === "All" || invoice.status === statusFilter
-                )
-                ?.filter((invoice) => {
-                    const invoiceNumber = invoice.invoiceNumber ?? "";
-                    const clientName = invoice.billTo?.clientName ?? "";
-                    const search = searchTerm?.toLowerCase() ?? "";
+    const filteredInvoicesList = useMemo(() => {
+        return invoicesList
+            ?.filter(
+                (invoice) =>
+                    statusFilter === "All" || invoice.status === statusFilter
+            )
+            ?.filter((invoice) => {
+                const invoiceNumber = invoice.invoiceNumber ?? "";
+                const clientName = invoice.billTo?.clientName ?? "";
+                const search = searchTerm?.toLowerCase() ?? "";
 
-                    return (
-                        invoiceNumber.toLowerCase().includes(search) ||
-                        clientName.toLowerCase().includes(search)
-                    );
-                }) || []
-        );
-    }, [invoices, searchTerm, statusFilter]);
+                return (
+                    invoiceNumber.toLowerCase().includes(search) ||
+                    clientName.toLowerCase().includes(search)
+                );
+            }) || [];
+    }, [invoicesList, searchTerm, statusFilter]);
+
 
 
     // global loading
-    const loading = deleteLoading || isLoading
+    const loading = deleteLoading
 
     if (loading) {
         return (
@@ -183,9 +208,38 @@ const Allinvoices = () => {
         )
     }
 
+    if (invoicesLoading)
+        return (<div className="w-[90vw] md:w-full max-h-[60vh] overflow-hidden">
+            <table className="min-w-full divide-y divide-slate-200">
+                <thead className="bg-slate-50">
+                    <tr>
+                        {Array.from({ length: 6 }).map((_, i) => (
+                            <th key={i} className="px-6 py-3">
+                                <div className="h-4 w-24 bg-slate-200 rounded animate-pulse"></div>
+                            </th>
+                        ))}
+                    </tr>
+                </thead>
+
+                <tbody className="bg-white divide-y divide-slate-200">
+                    {Array.from({ length: 6 }).map((_, row) => (
+                        <tr key={row}>
+                            {Array.from({ length: 6 }).map((_, col) => (
+                                <td key={col} className="px-6 py-4">
+                                    <div className="h-4 w-full bg-slate-200 rounded animate-pulse"></div>
+                                </td>
+                            ))}
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>)
+
+
+    // const invoicesHave = filteredInvoicesList?.length > 9
     //
     return (
-        <div className="space-y-6">
+        <div className="bg-app space-y-6">
             <DeleteConfirmModal
                 isOpen={deleteModalOpen}
                 onClose={() => setDeleteModalOpen(false)}
@@ -267,14 +321,14 @@ const Allinvoices = () => {
                     </div>
                 </div>
                 {/*  */}
-                {filteredInvoices?.length === 0 ? (
+                {filteredInvoicesList?.length === 0 ? (
                     <div className="w-full flex flex-col items-center justify-center py-12 text-center">
                         <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mb-4">
                             <FileText className="w-8 h-8 text-slate-400" />
                         </div>
                         <h3 className="text-lg">No Invoices found</h3>
                         <p className="text-slate-500 mb-6 max-w-md">Your search  or filter criteria did nto match any invoices.  Try adjusting you search</p>
-                        {invoices?.length === 0 && (
+                        {filteredInvoicesList?.length === 0 && (
                             <Button onClick={() => navigate('/invoices/new')} icon={Plus}>Create your first invoice</Button>
                         )}
                     </div>
@@ -289,30 +343,49 @@ const Allinvoices = () => {
                                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Due Date</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Status</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">Actions</th>
+                                    {/* {invoicesHave && (<th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wider">{filteredInvoicesList?.length} Invoices</th>)} */}
                                 </tr>
                             </thead>
 
                             <tbody className="bg-white divide-y divide-slate-200">
-                                {filteredInvoices?.map((invoice) => (
+
+                                {/* Render invoices */}
+                                {filteredInvoicesList?.map((invoice) => (
                                     <tr className="hover:bg-slate-50" key={invoice?._id}>
-                                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 cursor-pointer" onClick={() => navigate(`/invoices/${invoice?._id}`)}>
+                                        <td
+                                            className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-900 cursor-pointer"
+                                            onClick={() => navigate(`/invoices/${invoice?._id}`)}
+                                        >
                                             {invoice?.invoiceNumber}
                                         </td>
-                                        <td onClick={() => navigate(`/invoices/${invoice?._id}`)}>{invoice?.billTo?.clientName}</td>
-                                        <td onClick={() => navigate(`/invoices/${invoice?._id}`)}>{invoice?.total?.toFixed(2) || 0.00}</td>
-                                        <td onClick={() => navigate(`/invoices/${invoice?._id}`)}>{invoice?.dueDate ? moment(invoice?.dueDate).format("MMM DD, YYYY") : "N/A"}</td>
+
+                                        <td onClick={() => navigate(`/invoices/${invoice?._id}`)}>
+                                            {invoice?.billTo?.clientName}
+                                        </td>
+
+                                        <td onClick={() => navigate(`/invoices/${invoice?._id}`)}>
+                                            {invoice?.total?.toFixed(2) || "0.00"}
+                                        </td>
+
+                                        <td onClick={() => navigate(`/invoices/${invoice?._id}`)}>
+                                            {invoice?.dueDate ? moment(invoice?.dueDate).format("MMM DD, YYYY") : "N/A"}
+                                        </td>
+
                                         <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                            <span className={clsx(
-                                                "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
-                                                invoice?.status === "Paid"
-                                                    ? "bg-emerald-100 text-emerald-800"
-                                                    : invoice?.status === "Pending"
-                                                        ? "bg-amber-100 text-amber-800"
-                                                        : "bg-red-100 text-red-800"
-                                            )}>
+                                            <span
+                                                className={clsx(
+                                                    "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                                                    invoice?.status === "Paid"
+                                                        ? "bg-emerald-100 text-emerald-800"
+                                                        : invoice?.status === "Pending"
+                                                            ? "bg-amber-100 text-amber-800"
+                                                            : "bg-red-100 text-red-800"
+                                                )}
+                                            >
                                                 {invoice?.status}
                                             </span>
                                         </td>
+
                                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                             <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
                                                 <Button
@@ -328,22 +401,45 @@ const Allinvoices = () => {
                                                     )}
                                                 </Button>
 
-                                                <Button size="small" variant="ghost" onClick={() => navigate(`/invoices/${invoice?._id}`)}><Edit className="w-4 h-4" /></Button>
-                                                <Button
-                                                    size="small"
-                                                    variant="ghost"
-                                                    onClick={() => handleOpenDeleteModal(invoice?._id)}
-                                                >
+                                                <Button size="small" variant="ghost" onClick={() => navigate(`/invoices/${invoice?._id}`)}>
+                                                    <Edit className="w-4 h-4" />
+                                                </Button>
+
+                                                <Button size="small" variant="ghost" onClick={() => handleOpenDeleteModal(invoice?._id)}>
                                                     <Trash2 className="text-red-500 w-4 h-4" />
                                                 </Button>
-                                                {invoice?.status !== 'Paid' && (
-                                                    <Button size="small" variant="ghost" onClick={() => handleOpenReminderModal(invoice?._id)} title="Generate Reminder"><Mail className="text-blue-500 w-4 h-4" /></Button>
+
+                                                {invoice?.status !== "Paid" && (
+                                                    <Button
+                                                        size="small"
+                                                        variant="ghost"
+                                                        title="Generate Reminder"
+                                                        onClick={() => handleOpenReminderModal(invoice?._id)}
+                                                    >
+                                                        <Mail className="text-blue-500 w-4 h-4" />
+                                                    </Button>
                                                 )}
                                             </div>
                                         </td>
                                     </tr>
                                 ))}
+
+                                {/* Infinite scroll sentinel row */}
+                                <tr>
+                                    <td colSpan={6}>
+                                        <div ref={invoicesSentinelRef} className="h-10 w-full"></div>
+
+                                        {isFetchingNextPage && (
+                                            <div className="py-4 flex items-center justify-center text-slate-500 text-sm">
+                                                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                                                Loading invoices...
+                                            </div>
+                                        )}
+                                    </td>
+                                </tr>
                             </tbody>
+
+
                         </table>
                     </div>
 

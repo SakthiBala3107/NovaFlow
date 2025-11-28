@@ -1,6 +1,11 @@
 import type { LucideIcon } from "lucide-react";
 import type { InputHTMLAttributes, ReactNode } from "react";
 
+// proctedt routes
+export type ChildrenProps = {
+  children?: ReactNode;
+};
+
 /* ------------------- NAVIGATION / UI STUFF ------------------- */
 
 export interface NavigationItem {
@@ -349,3 +354,17 @@ export type FormState = {
   address: string;
   phone: string;
 };
+
+// get invoices pagination stuffs
+
+export interface CursorPaginatedResponse<T> {
+  next?: string | null;
+  previous?: string | null;
+  results?: T[];
+}
+
+export interface InvoicePaginatedResponse {
+  next?: string | null;
+  previous?: string | null;
+  results?: InvoiceType[];
+}

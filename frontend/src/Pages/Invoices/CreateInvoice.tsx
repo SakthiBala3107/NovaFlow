@@ -94,7 +94,11 @@ const CreateInvoice: React.FC<CreateInvoiceProps> = ({ existingInvoice }) => {
 
             try {
                 const response = await axiosInstance.get(API_PATHS.INVOICE.GET_ALL_INVOICES);
-                const invoices = response?.data || [];
+
+                const invoices = Array.isArray(response?.data?.invoices)
+                    ? response.data.invoices
+                    : [];
+
 
                 let maxNum = 0;
                 invoices.forEach((inv: InvoicePayload) => {

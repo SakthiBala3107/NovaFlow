@@ -56,17 +56,67 @@ export const createInvoice = async (req, res) => {
   }
 };
 
+//
+// export const getInvoices = async (req, res) => {
+//   try {
+//     const invoices = await Invoice.find().populate("user", "name email");
+//     res.json(invoices);
+
+//     //
+//   } catch (error) {
+//     console.error("Error getting Invoices", error);
+//   }
+// };
+
+//
+
+// GET /api/invoices?cursor=<lastId>&limit=10
+
 export const getInvoices = async (req, res) => {
   try {
-    const invoices = await Invoice.find().populate("user", "name email");
-    res.json(invoices);
+    const limit = parseInt(req.query.limit) || 10;
+    const cursor = req.query.cursor;
+
+    const query = {};
+
+    // If cursor exists, fetch items AFTER this cursor
+    if (cursor) {
+      query._id = { $gt: cursor };
+    }
+
+    const invoices = await Invoice.find(query)
+      .sort({ _id: 1 })
+      .limit(limit + 1)
+      .populate("user", "name email");
+
+    let next = null;
+
+    if (invoices.length > limit) {
+      next = invoices[invoices.length - 1]._id;
+      invoices.pop();
+    }
+
+    // build next + previous URLs
+    const baseUrl = `${req.protocol}://${req.get("host")}${
+      req.originalUrl.split("?")[0]
+    }`;
 
     //
+    res.set("Cache-Control", "no-store");
+
+    //
+    res.json({
+      next: next ? `${baseUrl}?cursor=${next}&limit=${limit}` : null,
+      previous: cursor ? `${baseUrl}?before=${cursor}&limit=${limit}` : null,
+      results: invoices,
+    });
   } catch (error) {
-    console.error("Error getting Invoices", error);
+    console.error("Error getting invoices", error);
+    res.status(500).json({ error: "Server error" });
   }
 };
 
+//
 export const getInvoiceById = async (req, res) => {
   const { id } = req.params;
   try {

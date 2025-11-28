@@ -1,9 +1,9 @@
 // hooks/useLogin.ts
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axiosInstance from '../utils/axiosInstance';
 import { API_PATHS } from '../utils/apiPath';
 import toast from 'react-hot-toast';
-import type { LoginResponse, ApiError, LoginData, SignupResponse, SignupData, GetAllInvoicesResponse, DashboardSummary, InvoicePayload, InvoiceType, DashboardInvoice, UpdateInvoiceArgs, ParseInvoiceRequest, ParseInvoiceResponse, GenerateReminderParams, GenerateReminderResponse, FormState } from '../types/data.types';
+import type { LoginResponse, ApiError, LoginData, SignupResponse, SignupData, GetAllInvoicesResponse, DashboardSummary, InvoicePayload, InvoiceType, DashboardInvoice, UpdateInvoiceArgs, ParseInvoiceRequest, ParseInvoiceResponse, GenerateReminderParams, GenerateReminderResponse, FormState, InvoicePaginatedResponse } from '../types/data.types';
 import { useAuth } from '../context/AuthContext';
 
 
@@ -154,22 +154,41 @@ export const useCreateInvoice = () => {
 // src/hooks/useGetInvoices.ts
 
 
-export const useGetInvoices = () => {
-    return useQuery<InvoiceType[]>({
-        queryKey: ["invoices-list"],
-        queryFn: async () => {
-            const res = await axiosInstance.get<InvoiceType[]>(
-                API_PATHS.INVOICE.GET_ALL_INVOICES
-            );
 
-            return res.data?.sort(
-                (a, b) =>
-                    new Date(b.invoiceDate).getTime() -
-                    new Date(a.invoiceDate).getTime()
-            );
+
+export const useGetInvoices = () => {
+    return useInfiniteQuery<InvoicePaginatedResponse>({
+        queryKey: ["invoices-list"],
+
+        queryFn: async ({ pageParam }) => {
+            const url =
+                typeof pageParam === "string"
+                    ? pageParam
+                    : API_PATHS.INVOICE.GET_ALL_INVOICES;
+
+            const response = await axiosInstance.get<InvoicePaginatedResponse>(url);
+            return response.data;
         },
+
+        initialPageParam: API_PATHS.INVOICE.GET_ALL_INVOICES,
+
+        getNextPageParam: (lastPage) => {
+            if (!lastPage?.next) return undefined;
+
+            const nextUrl = lastPage.next.startsWith("http")
+                ? lastPage.next
+                : `${window.location.origin}${lastPage.next}`;
+
+            return nextUrl;
+        },
+
+        staleTime: 1000 * 60 * 2,
+        retry: 2,
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
     });
 };
+
 
 
 //delete a invoice

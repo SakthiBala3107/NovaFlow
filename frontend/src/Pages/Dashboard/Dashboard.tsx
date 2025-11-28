@@ -13,7 +13,11 @@ const Dashboard = () => {
     const navigate = useNavigate();
     const { data: invoiceData, isLoading: isFetching, error } = useGetAllInvoices();
 
-    const Invoices: DashboardInvoice[] = invoiceData?.invoices ?? invoiceData ?? [];
+    const Invoices: DashboardInvoice[] = Array.isArray(invoiceData?.invoices)
+        ? invoiceData.invoices
+        : Array.isArray(invoiceData)
+            ? invoiceData
+            : [];
 
     // Derived stats
     const totalInvoices = Invoices?.length;

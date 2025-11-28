@@ -32,6 +32,7 @@ app.use("/api/ai", AuthMiddleWare, AI_Router);
 app.get("/", (req, res) => {
   res.send("Server running...");
 });
+app.disable("etag");
 
 // Start server
 const startServer = async () => {
